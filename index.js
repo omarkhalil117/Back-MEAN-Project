@@ -11,11 +11,13 @@ mongoose.connect(process.env.MONGODB_URI_LOCAL)
   .then(() => console.log('Connected to db'))
   .catch((err) => console.log(err.message));
 
+app.use(express.json());
+
 app.get('/', (req, res) => res.send('Hello World!'));
 
 app.use('/Authors', AuthorRoutes);
 
-app.use(function (err, req, res) {
+app.use((err, req, res) => {
   res.status(500).send('Something broke!');
 });
 

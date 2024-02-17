@@ -1,27 +1,46 @@
 const express = require('express');
-const { getAll, addAuthor, updateAuthor, deletAuthor, getOne } = require('../controllers/Authors');
+const {
+  getAll, addAuthor, updateAuthor, deletAuthor, getOne,
+} = require('../controllers/Authors');
 
 const router = express.Router();
 
 router.get('/', getAll);
 
-router.get('/:id', getOne);
-
-router.post('/', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const newAuthor = addAuthor(req.body);
-    console.log(req.body);
-    if (!newAuthor) {
-      return res.status(400).json({ message: 'Bad request' });
-    }
-  return res.json(newAuthor);
+    const author = await getOne(req.params.id);
+    return res.json(author);
   } catch (err) {
-    return res.status(400).json({ message: 'Bad request' });
+    return res.status(400).json({ message: err.message });
   }
 });
 
-router.patch('/:id', updateAuthor);
+router.post('/', async (req, res) => {
+  try {
+    const newAuthor = await addAuthor(req.body);
+    return res.json(newAuthor);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+});
 
-router.delete('/:id', deletAuthor);
+router.patch('/:id', async (req, res) => {
+  try {
+    const update = await updateAuthor(req.params.id, req.body);
+    return res.json(update);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await deletAuthor(req.params.id);
+    return res.json(deleted);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+});
 
 module.exports = router;
