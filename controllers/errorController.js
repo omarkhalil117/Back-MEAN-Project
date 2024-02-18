@@ -1,4 +1,4 @@
-const AppError = require('../utils/errorHamdling');
+const AppError = require('../utils/appError');
 
 const handleValidationErrorDB = (err) => {
   const errors = Object.values(err.errors).map((el) => el.message);

@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const globalErrorHandling = require('./controllers/errorController');
 const userRoutes = require('./routes/user');
-const AppError = require('./utils/errorHamdling');
+const AppError = require('./utils/appError');
 
 const app = express();
 app.use(express.json());
