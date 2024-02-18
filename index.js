@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: './config.env' });
 const express = require('express');
 const mongoose = require('mongoose');
 
@@ -8,10 +8,17 @@ const globalErrorHandling = require('./controllers/errorController');
 const userRoutes = require('./routes/user');
 const AppError = require('./utils/appError');
 
+const bookRouter = require('./routes/bookRouter');
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
+
 const app = express();
 app.use(express.json());
 
-mongoose.connect('mongodb://localhost:27017/good_book')
+app.use(express.json());
+
+mongoose
+  .connect(process.env.MONGODB_URI_LOCAL)
   .then(() => console.log('Connected to db'))
   .catch((err) => console.log(err));
 
