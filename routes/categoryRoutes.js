@@ -9,10 +9,10 @@ const {
 } =require('../controllers/categoryController')
  
 
-router.get('/categories',  getAllCategories);
-router.get('/categories/:id', getCategoryById);
-router.post('/categories',  createCategory);
-router.patch('/categories/:id', updateCategory);
-router.delete('/categories/:id',  deleteCategory);
+router.get('/',  getAllCategories);
+router.get('/:id', getCategoryById);
+router.post('/',  createCategory);
+router.patch('/:id', updateCategory);
+router.delete('/:id',  deleteCategory);
 
 module.exports = router;
