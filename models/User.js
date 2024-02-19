@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
   userName: {
@@ -49,6 +50,8 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Please enter your password'],
+    //! good best practice to make password  does not get implicitly
+    select: false,
     validate: {
       validator(value) {
         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
@@ -62,6 +65,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     //! make image required
   },
-});
+}, { timestamps: true });
+
+userSchema.methods.correctPassword = function (comingPassword, realPassword) {
+  return bcrypt(comingPassword, realPassword);
+};
+
+// userSchema.methods.changePasswordAfter = function (JWT) {
+//   if(this.)
+//   return false;
+// };
 
 module.exports = mongoose.model('User', userSchema);
