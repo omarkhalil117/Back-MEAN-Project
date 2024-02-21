@@ -1,7 +1,5 @@
 const Category = require('../models/category');
-const mongoose=require('mongoose')
 
- 
 const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.find();
@@ -10,7 +8,6 @@ const getAllCategories = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
 
 const getCategoryById = async (req, res) => {
   try {
@@ -22,22 +19,19 @@ const getCategoryById = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+  return true;
 };
 
- 
 const createCategory = async (req, res) => {
-    try {
-      
-      const category = new Category(req.body);
-      const newCategory = await category.save();
-      res.status(200).json(newCategory);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  };
-  
+  try {
+    const category = new Category(req.body);
+    const newCategory = await category.save();
+    res.status(200).json(newCategory);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
- 
 const updateCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -48,9 +42,9 @@ const updateCategory = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+  return true;
 };
 
- 
 const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
@@ -61,12 +55,13 @@ const deleteCategory = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+  return true;
 };
 
-module.exports ={
-    getAllCategories,
-    getCategoryById,
-    createCategory,
-    updateCategory,
-    deleteCategory
-}
+module.exports = {
+  getAllCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+};
