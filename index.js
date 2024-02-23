@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-
+const cors = require('cors');
 const AuthorRoutes = require('./routes/Authors');
 
 const app = express();
@@ -13,9 +13,11 @@ mongoose.connect(process.env.MONGODB_URI_LOCAL)
 
 app.use(express.json());
 
+app.use(cors());
+
 app.get('/', (req, res) => res.send('Hello World!'));
 
-app.use('/Authors', AuthorRoutes);
+app.use('/authors', AuthorRoutes);
 
 app.use((err, req, res) => {
   res.status(500).send('Something broke!');
