@@ -1,17 +1,18 @@
 //! built in util module that has a function make me promisify method
 //! to make it return promise and can async/await it
 const { promisify } = require('util');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
-const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRET, {
   expiresIn: '1d',
 });
 
+// eslint-disable-next-line no-unused-vars
 const register = catchAsync(async (req, res, next) => {
+  console.log('hit me!');
   const {
     userName, firstName, lastName, email,
     password,
@@ -22,7 +23,7 @@ const register = catchAsync(async (req, res, next) => {
     firstName,
     lastName,
     email,
-    password
+    password,
   });
   //! once your register you are logged in
   // eslint-disable-next-line no-underscore-dangle
@@ -38,18 +39,18 @@ const register = catchAsync(async (req, res, next) => {
 
 const login = catchAsync(async (req, res, next) => {
   //! 1) check if email and password exist in body
-  const {email,password} = req.body
-  if (!email || !password) {
-    return next(new AppError('Please provide email and password', 400));
+  const { userName, password } = req.body;
+  if (!userName || !password) {
+    return next(new AppError('Please provide userName and password', 400));
   }
   //! 2) check if user exists and password is correct
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ userName }).select('+password');
   const correct = user.correctPassword(password, user.password);
   if (!user || !correct) {
     return next(new AppError('Incorrect email or password', 401));
   }//! 3) if okay send token
   // eslint-disable-next-line no-underscore-dangle
-  const token = generateToken(user._id);
+  const token = generateToken(user._id, user.role);
   res.status(200).json({
     status: 'success',
     token,
@@ -68,7 +69,7 @@ const protect = catchAsync(async (req, res, next) => {
     return next(new AppError('You are not logged in !', 401));
   }
   //! 2) Verification token
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   //* when it decoded occure it throw two type of error
   //* 1) invalid signature (when some when change payload or jwt body)
   //! 3) Check if user still exists
@@ -99,6 +100,6 @@ const specifyRole = (role) => (req, res, next) => {
   }
 };
 
-module.exports = {
+const adminAddAdmin = module.exports = {
   register, login, protect, specifyRole,
 };

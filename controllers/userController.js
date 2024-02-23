@@ -25,7 +25,9 @@ const addBookToUser = catchAsync(async (req, res, next) => {
   return true;
 });
 
+// eslint-disable-next-line no-unused-vars
 const getAllUsersBooks = catchAsync(async (req, res, next) => {
+  // eslint-disable-next-line no-underscore-dangle
   const userWithHisBooks = await User.findById(req.user._id).populate('books');
   res.status(200).json({
     status: 'success',
