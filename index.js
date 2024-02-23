@@ -1,15 +1,18 @@
-require('dotenv').config();
+require('dotenv').config({ path: './config.env' });
 const express = require('express');
 const mongoose = require('mongoose');
+
+const authorRoutes = require('./routes/Authors');
+const categoryRoutes =require('./routes/categoryRoutes')
+const globalErrorHandling = require('./controllers/errorController');
+const userRoutes = require('./routes/user');
+const AppError = require('./utils/appError');
+
+const bookRouter = require('./routes/bookRouter');
 const cors = require('cors');
 const AuthorRoutes = require('./routes/Authors');
 
 const app = express();
-const port = 3000;
-
-mongoose.connect(process.env.MONGODB_URI_LOCAL)
-  .then(() => console.log('Connected to db'))
-  .catch((err) => console.log(err.message));
 
 app.use(express.json());
 
@@ -17,10 +20,16 @@ app.use(cors());
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
-app.use('/authors', AuthorRoutes);
+app.use('/users', userRoutes);
+app.use('/books', bookRouter);
+app.use('/authors', authorRoutes);
+app.use('/categories', categoryRoutes);
 
-app.use((err, req, res) => {
-  res.status(500).send('Something broke!');
+app.all('*', (req, res, next) => {
+  next(new AppError('not found', 404));
 });
 
+app.use(globalErrorHandling);
+
+const port = 3000;
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
