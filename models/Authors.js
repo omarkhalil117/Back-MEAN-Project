@@ -14,6 +14,7 @@ const schema = mongoose.Schema({
     required: true,
   },
   dob: Date,
+  photo : String,
 });
 
 const Authors = mongoose.model('Authors', schema);

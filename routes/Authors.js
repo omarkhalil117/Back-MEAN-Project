@@ -1,6 +1,6 @@
 const express = require('express');
 const {
-  getAll, addAuthor, updateAuthor, deletAuthor, getOne,
+  getAll, addAuthor, updateAuthor, deletAuthor, getOne, getAuthorBooks,
 } = require('../controllers/Authors');
 
 const router = express.Router();
@@ -10,7 +10,8 @@ router.get('/', getAll);
 router.get('/:id', async (req, res) => {
   try {
     const author = await getOne(req.params.id);
-    return res.json(author);
+    const Authorbooks = await getAuthorBooks(req.params.id);
+    return res.json({status:"succes", author , Authorbooks});
   } catch (err) {
     return res.status(400).json({ message: err.message });
   }

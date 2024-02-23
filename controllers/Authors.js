@@ -1,5 +1,5 @@
 const Authors = require('../models/Authors');
-
+const Books = require('../models/Books')
 const getAll = async (req, res) => {
   try {
     const authors = await Authors.find({});
@@ -40,10 +40,20 @@ const deletAuthor = async (id) => {
   return deleted;
 };
 
+// //////////////////////////////////////////////////////////////
+
+const getAuthorBooks = async (id) => {
+  console.log(await Books.find({authorID:id}))
+  const Authorbooks = await Books.find({authorID: id});
+  console.log(Authorbooks)
+  return Authorbooks;
+}
+
 module.exports = {
   getAll,
   addAuthor,
   updateAuthor,
   deletAuthor,
   getOne,
+  getAuthorBooks,
 };

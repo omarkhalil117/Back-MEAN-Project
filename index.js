@@ -1,22 +1,30 @@
 require('dotenv').config({ path: './config.env' });
 const express = require('express');
 const mongoose = require('mongoose');
-
+const multer = require('multer')
 const authorRoutes = require('./routes/Authors');
-const categoryRoutes =require('./routes/categoryRoutes')
+const categoryRoutes = require('./routes/categoryRoutes')
 const globalErrorHandling = require('./controllers/errorController');
 const userRoutes = require('./routes/user');
 const AppError = require('./utils/appError');
 
 const bookRouter = require('./routes/bookRouter');
 const cors = require('cors');
-const AuthorRoutes = require('./routes/Authors');
+const Authors = require('./models/Authors');
+
 
 const app = express();
+const port = 3000;
+
+mongoose.connect(process.env.MONGODB_URI_LOCAL)
+  .then(() => console.log('Connected to db'))
+  .catch((err) => console.log(err.message));
 
 app.use(express.json());
 
 app.use(cors());
+
+
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
@@ -25,11 +33,33 @@ app.use('/books', bookRouter);
 app.use('/authors', authorRoutes);
 app.use('/categories', categoryRoutes);
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now();
+    cb(null,uniqueSuffix + file.originalname)
+  }
+})
+
+const upload = multer({ storage: storage, dest:'uploads/'})
+
+app.post('/upload-author-image/:img' , upload.single("image") , async (req , res)=>{
+
+   const file = req.file.filename;
+   const originalImage = req.params.img;
+   
+   const result = await Authors.updateOne({photo:originalImage},{photo:file})
+   console.log(result);
+   res.json({filename:file});
+
+})
+
 app.all('*', (req, res, next) => {
   next(new AppError('not found', 404));
 });
 
 app.use(globalErrorHandling);
 
-const port = 3000;
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
