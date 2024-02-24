@@ -9,7 +9,7 @@ const booksSchema = new mongoose.Schema({
   },
   categoryID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Categories',
+    ref: 'Category',
     required: [true, 'Book must have a category'],
   },
   name: {
@@ -29,6 +29,7 @@ const booksSchema = new mongoose.Schema({
   shelve: {
     type: String,
     enum: ['read', 'reading', 'want to read'],
+    default: "want to read"
   },
 });
 
