@@ -11,7 +11,7 @@ const AppError = require('./utils/appError');
 const bookRouter = require('./routes/bookRoutes');
 
 const app = express();
-
+dotenv.config('.env');
 app.use(cors());
 app.use(express.json());
 app.use(express.static('uploads'));

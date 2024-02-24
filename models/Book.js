@@ -1,30 +1,47 @@
 const mongoose = require('mongoose');
-// const AutoIncrement = require("mongoose-sequence")(mongoose);
+const AutoIncrement = require('mongoose-sequence')(mongoose);
+
+const reviewsSchema = new mongoose.Schema({
+  ratingBook: {
+    type: Number,
+  },
+  reviewBook: {
+    type: String,
+  },
+}, { _id: false });
 
 const booksSchema = new mongoose.Schema({
+  ID: {
+    type: Number,
+  },
   authorID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Authors',
-    required: [true, 'Book must have an author'],
+    // required: [true, 'Book must have an author'],
   },
   categoryID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Categories',
-    required: [true, 'Book must have a category'],
+    // required: [true, 'Book must have a category'],
   },
   name: {
     type: String,
     required: [true, 'Book must have a name'],
   },
+  reviews: {
+    type: [reviewsSchema],
+  },
   avgRate: {
     type: Number,
+    default: 0,
   },
   rating: {
     type: Number,
+    default: 0,
   },
   cover: {
     type: String,
-    required: [true, 'Book must have a cover'],
+    // required: [true, 'Book must have a cover'],
   },
   shelve: {
     type: String,
@@ -33,7 +50,7 @@ const booksSchema = new mongoose.Schema({
 });
 
 // Increment id of the book
-// booksSchema.plugin(AutoIncrement, { inc_field: "id" });
+booksSchema.plugin(AutoIncrement, { inc_field: 'ID' });
 
 const Books = mongoose.model('Books', booksSchema);
 
