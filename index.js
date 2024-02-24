@@ -1,9 +1,9 @@
-require('dotenv').config({ path: './config.env' });
+const dotenv = require('dotenv');
 const express = require('express');
+const cors = require('cors'); // Import the cors middleware
 const mongoose = require('mongoose');
-
 const authorRoutes = require('./routes/authorRoutes');
-const categoryRoutes =require('./routes/categoryRoutes')
+const categoryRoutes = require('./routes/categoryRoutes');
 const globalErrorHandling = require('./controllers/errorController');
 const userRoutes = require('./routes/userRoutes');
 const AppError = require('./utils/appError');
@@ -12,10 +12,11 @@ const bookRouter = require('./routes/bookRoutes');
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
+app.use(express.static('uploads'));
 
-mongoose
-  .connect(process.env.MONGODB_URI_LOCAL)
+mongoose.connect(process.env.MONGODB_URI_LOCAL)
   .then(() => console.log('Connected to db'))
   .catch((err) => console.log(err));
 

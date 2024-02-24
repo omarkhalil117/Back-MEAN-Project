@@ -1,7 +1,20 @@
 const express = require('express');
+const multer = require('multer');
 const {
   getAll, addAuthor, updateAuthor, deletAuthor, getOne,
 } = require('../controllers/authorController');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now();
+    cb(null, uniqueSuffix + file.originalname);
+  },
+});
+//! upload photo
+const upload = multer({ storage });
 
 const router = express.Router();
 
@@ -16,8 +29,12 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', upload.single('photo'), async (req, res) => {
   try {
+    if (req.file) {
+      //! put photo url in body that will be sent to mongodb
+      req.body.photo = req.file.filename;
+    }
     const newAuthor = await addAuthor(req.body);
     return res.json(newAuthor);
   } catch (err) {
@@ -25,8 +42,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.patch('/:id', async (req, res) => {
+//! layer for upload will put info in next middleware
+router.patch('/:id', upload.single('photo'), async (req, res) => {
   try {
+    if (req.file) {
+      //! put photo url in body that will be sent to mongodb
+      req.body.photo = req.file.filename;
+    }
     const update = await updateAuthor(req.params.id, req.body);
     return res.json(update);
   } catch (err) {
