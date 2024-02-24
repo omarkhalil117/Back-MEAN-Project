@@ -100,6 +100,6 @@ const specifyRole = (role) => (req, res, next) => {
   }
 };
 
-const adminAddAdmin = module.exports = {
+module.exports = {
   register, login, protect, specifyRole,
 };
