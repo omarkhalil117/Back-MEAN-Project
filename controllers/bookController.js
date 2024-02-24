@@ -1,6 +1,7 @@
 const Book = require('../models/Book');
 const AppError = require('../utils/appError');
 
+// eslint-disable-next-line consistent-return
 exports.getAllbooks = async (req, res, next) => {
   try {
     const books = await Book.find();
@@ -22,6 +23,7 @@ exports.getAllbooks = async (req, res, next) => {
   }
 };
 
+// eslint-disable-next-line consistent-return
 exports.getBook = async (req, res, next) => {
   try {
     const book = await Book.findById(req.params.id);
@@ -67,6 +69,7 @@ exports.createBook = async (req, res) => {
   }
 };
 
+// eslint-disable-next-line consistent-return
 exports.deleteBook = async (req, res, next) => {
   try {
     const deletedBook = await Book.findByIdAndDelete(req.params.id);
@@ -87,6 +90,7 @@ exports.deleteBook = async (req, res, next) => {
   }
 };
 
+// eslint-disable-next-line consistent-return
 exports.updateBook = async (req, res, next) => {
   try {
     if (req.file) {
@@ -111,6 +115,76 @@ exports.updateBook = async (req, res, next) => {
   } catch (error) {
     res.status(404).json({
       status: 'fail',
+      message: error.message,
+    });
+  }
+};
+
+// eslint-disable-next-line consistent-return
+exports.reviewBook = async (req, res, next) => {
+  try {
+    const { ratingBook, reviewBook } = req.body;
+
+    const book = await Book.findById(req.params.id);
+
+    if (!book) {
+      return next(new AppError("No book found with that ID", 404));
+    }
+
+    const review = {
+      ratingBook: Number(ratingBook),
+      reviewBook,
+    };
+
+    book.reviews.push(review);
+    if (book.reviews.length === 0) {
+      book.avgRate = 0;
+    } else {
+      book.avgRate = book.reviews.reduce((total, item) => total + item.ratingBook, 0)
+        / book.reviews.length;
+    }
+
+    res.status(201).json({
+      message: "Book has a review now",
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: 'fail',
+      message: error.message,
+    });
+  }
+};
+
+// eslint-disable-next-line consistent-return
+exports.reviewBook = async (req, res, next) => {
+  try {
+    const { ratingBook, reviewBook } = req.body;
+
+    const book = await Book.findById(req.params.id);
+
+    if (!book) {
+      return next(new AppError("No book found with that ID", 404));
+    }
+
+    const review = {
+      ratingBook: Number(ratingBook),
+      reviewBook,
+    };
+
+    book.reviews.push(review);
+    if (book.reviews.length === 0) {
+      book.avgRate = 0;
+    } else {
+      book.avgRate = book.reviews.reduce((total, item) => total + item.ratingBook, 0)
+        / book.reviews.length;
+    }
+
+    res.status(201).json({
+      message: "Book has a review now",
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "fail",
       message: error.message,
     });
   }
