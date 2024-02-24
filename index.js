@@ -2,13 +2,13 @@ require('dotenv').config({ path: './config.env' });
 const express = require('express');
 const mongoose = require('mongoose');
 
-const authorRoutes = require('./routes/Authors');
+const authorRoutes = require('./routes/authorRoutes');
 const categoryRoutes =require('./routes/categoryRoutes')
 const globalErrorHandling = require('./controllers/errorController');
-const userRoutes = require('./routes/user');
+const userRoutes = require('./routes/userRoutes');
 const AppError = require('./utils/appError');
 
-const bookRouter = require('./routes/bookRouter');
+const bookRouter = require('./routes/bookRoutes');
 
 const app = express();
 
