@@ -89,9 +89,6 @@ exports.deleteBook = async (req, res, next) => {
 
 exports.updateBook = async (req, res, next) => {
   try {
-    console.log(req.body);
-    console.log(req.params.id);
-
     if (req.file) {
       //! put photo url in body that will be sent to mongodb
       req.body.cover = req.file.filename;
