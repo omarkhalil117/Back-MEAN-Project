@@ -14,4 +14,8 @@ router
   .patch(bookController.updateBook)
   .delete(bookController.deleteBook);
 
+router
+  .route('/:id/reviews')
+  .post(bookController.reviewBook);
+
 module.exports = router;

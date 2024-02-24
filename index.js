@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 
-const bookRouter = require('./routes/bookRouter');
+const bookRouter = require('./routes/bookRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
