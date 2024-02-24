@@ -1,4 +1,4 @@
-const Book = require('../models/books');
+const Book = require('../models/Book');
 const AppError = require('../utils/appError');
 
 exports.getAllbooks = async (req, res, next) => {
@@ -47,6 +47,10 @@ exports.getBook = async (req, res, next) => {
 
 exports.createBook = async (req, res) => {
   try {
+    if (req.file) {
+      //! put photo url in body that will be sent to mongodb
+      req.body.cover = req.file.filename;
+    }
     const newBook = await Book.create(req.body);
 
     res.status(201).json({
@@ -85,9 +89,16 @@ exports.deleteBook = async (req, res, next) => {
 
 exports.updateBook = async (req, res, next) => {
   try {
-    const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, {
+    console.log(req.body);
+    console.log(req.params.id);
+
+    if (req.file) {
+      //! put photo url in body that will be sent to mongodb
+      req.body.cover = req.file.filename;
+    }
+    // const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body);
+    const updatedBook = await Book.findOneAndUpdate({ _id: req.params.id }, req.body, {
       new: true,
-      runValidators: true,
     });
 
     if (!updatedBook) {
