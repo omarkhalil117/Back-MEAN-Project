@@ -36,8 +36,7 @@ const getAllUsersBooks = catchAsync(async (req, res, next) => {
   });
 });
 
-const  getUserBooksPop = catchAsync(async (req,res,next) => {
-  console.log("books pop")
+const getUserBooksPop = catchAsync(async (req,res,next) => {
   const fullInfo = await User.findById(req.params.id)
   .populate({
     path : 'books.book',
@@ -50,6 +49,14 @@ const  getUserBooksPop = catchAsync(async (req,res,next) => {
   res.json({
     fullInfo
   })
+})
+
+const updateUserBookShelve = catchAsync(async (req,res,next) => {
+  const updatedShelve = await User.updateOne(
+   { _id: req.params.id , 'books.book': req.params.bookId },
+   { $set: { 'books.$.shelve': req.body.shelve } }
+)
+  res.json({message:"success" , updatedShelve});
 })
 
 const generateToken = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRET, {
@@ -103,5 +110,10 @@ const register = catchAsync(async (req, res, next) => {
 });
 
 module.exports = {
-  addBookToUser, getAllUsersBooks, login, getUserBooksPop, register
+  addBookToUser, 
+  getAllUsersBooks, 
+  login, 
+  getUserBooksPop, 
+  register, 
+  updateUserBookShelve
 };
