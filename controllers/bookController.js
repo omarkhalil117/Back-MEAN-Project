@@ -128,7 +128,7 @@ exports.reviewBook = async (req, res, next) => {
     const book = await Book.findById(req.params.id);
 
     if (!book) {
-      return next(new AppError("No book found with that ID", 404));
+      return next(new AppError('No book found with that ID', 404));
     }
 
     const review = {
@@ -145,7 +145,7 @@ exports.reviewBook = async (req, res, next) => {
     }
 
     res.status(201).json({
-      message: "Book has a review now",
+      message: 'Book has a review now',
     });
   } catch (error) {
     res.status(404).json({
@@ -163,7 +163,7 @@ exports.reviewBook = async (req, res, next) => {
     const book = await Book.findById(req.params.id);
 
     if (!book) {
-      return next(new AppError("No book found with that ID", 404));
+      return next(new AppError('No book found with that ID', 404));
     }
 
     const review = {
@@ -180,11 +180,11 @@ exports.reviewBook = async (req, res, next) => {
     }
 
     res.status(201).json({
-      message: "Book has a review now",
+      message: 'Book has a review now',
     });
   } catch (error) {
     res.status(404).json({
-      status: "fail",
+      status: 'fail',
       message: error.message,
     });
   }

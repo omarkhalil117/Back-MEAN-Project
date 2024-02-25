@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const {
-    register, login, protect, specifyRole,
+  register, login, protect, specifyRole,
 } = require('../controllers/authController');
 const { addBookToUser, getAllUsersBooks } = require('../controllers/userController');
 

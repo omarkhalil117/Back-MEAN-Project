@@ -1,7 +1,7 @@
-const Category = require("../models/Category");
-const Book = require("../models/Book");
-const User = require("../models/User");
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const Category = require('../models/Category');
+const Book = require('../models/Book');
+const User = require('../models/User');
 
 const getAllCategories = async (req, res) => {
   try {
@@ -16,7 +16,7 @@ const getCategoryById = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
-      return res.status(404).json({ message: "Category not found" });
+      return res.status(404).json({ message: 'Category not found' });
     }
 
     const books = await Book.find({ categoryID: req.params.id });
@@ -29,50 +29,58 @@ const getCategoryById = async (req, res) => {
 const getPopularCategory = async (req, res) => {
   try {
     // const pipeline = [
-    //{ $match: { rating: { $gt:  0 } } },
-    //{ $group: { _id: "$categoryID", count: { $sum:  1 } } },
+    // { $match: { rating: { $gt:  0 } } },
+    // { $group: { _id: "$categoryID", count: { $sum:  1 } } },
     // { $sort: { count: -1 } },
     //  { $limit:  5 }
     // ];
 
     const pipeline = [
       { $match: { rating: { $gt: 0 } } },
-      { $group: { _id: "$categoryID", count: { $sum: 1 } } },
+      { $group: { _id: '$categoryID', count: { $sum: 1 } } },
       {
         $lookup: {
-          from: "categories",
-          localField: "_id",
-          foreignField: "_id",
-          as: "category",
+          from: 'categories',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'category',
         },
       },
-      { $unwind: "$category" },
+      { $unwind: '$category' },
       { $sort: { count: -1 } },
       { $limit: 5 },
     ];
     const popularCategories = await Book.aggregate(pipeline);
     console.log(popularCategories);
     if (!popularCategories) {
-      return res.status(404).json({ message: "no popular category found" });
+      return res.status(404).json({ message: 'no popular category found' });
     }
     res.status(200).json(popularCategories);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-  return true;
 };
 
- 
-const createCategory = async (req, res) => {
+const getCategoriesOfUser = async (req, res) => {
   try {
-    const category = new Category(req.body);
-    const newCategory = await category.save();
-    res.status(200).json(newCategory);
+    const user = await User.findOne({ _id: req.params.userId });
+    if (!user) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    const bookIds = user.books;
+
+    const categories = await Book.find({ _id: { $in: bookIds } }).populate(
+      'categoryID',
+    );
+    const categoryNames = categories.map((book) => book.categoryID);
+
+    res.status(200).json(categoryNames);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
+const createCategory = async (req, res) => {
   try {
     const category = new Category(req.body);
     const newCategory = await category.save();
@@ -88,27 +96,24 @@ const updateCategory = async (req, res) => {
       new: true,
     });
     if (!category) {
-      return res.status(404).json({ message: "Category not found" });
+      return res.status(404).json({ message: 'Category not found' });
     }
     res.json(category);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-  return true;
 };
-
 
 const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) {
-      return res.status(404).json({ message: "Category not found" });
+      return res.status(404).json({ message: 'Category not found' });
     }
-    res.status(200).json({ message: "Category deleted" });
+    res.status(200).json({ message: 'Category deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-  return true;
 };
 
 module.exports = {
