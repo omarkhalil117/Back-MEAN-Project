@@ -1,4 +1,4 @@
-const Authors = require('../models/Authors');
+const Authors = require('../models/Author');
 
 const getAll = async (req, res) => {
   try {

@@ -1,7 +1,7 @@
 const express = require('express');
 const {
   getAll, addAuthor, updateAuthor, deletAuthor, getOne,
-} = require('../controllers/Authors');
+} = require('../controllers/authorController');
 
 const router = express.Router();
 

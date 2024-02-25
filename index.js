@@ -3,8 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-const authorRoutes = require('./routes/Authors');
-const bookRouter = require('./routes/bookRouter');
+const authorRoutes = require('./routes/authorRoutes');
+const bookRouter = require('./routes/bookRoutes');
 
 const categoryRoutes =require('./routes/categoryRoutes')
 
