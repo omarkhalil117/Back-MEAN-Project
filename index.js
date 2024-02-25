@@ -6,7 +6,6 @@ const authorRoutes = require("./routes/authorRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const globalErrorHandling = require("./controllers/errorController");
 const userRoutes = require("./routes/userRoutes");
-const reviewRoutes = require("./routes/reviewRoutes");
 const AppError = require("./utils/appError");
 
 const bookRouter = require("./routes/bookRoutes");
@@ -26,7 +25,6 @@ app.use("/users", userRoutes);
 app.use("/books", bookRouter);
 app.use("/authors", authorRoutes);
 app.use("/categories", categoryRoutes);
-app.use("/reviews", reviewRoutes);
 
 app.all("*", (req, res, next) => {
   next(new AppError("not found", 404));

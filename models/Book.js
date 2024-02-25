@@ -1,14 +1,17 @@
 const mongoose = require("mongoose");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
 
-const reviewsSchema = new mongoose.Schema({
-  ratingBook: {
-    type: Number,
+const reviewsSchema = new mongoose.Schema(
+  {
+    ratingBook: {
+      type: Number,
+    },
+    reviewBook: {
+      type: String,
+    },
   },
-  reviewBook: {
-    type: String,
-  },
-}, { _id: false });
+  { _id: false }
+);
 
 const booksSchema = new mongoose.Schema(
   {
@@ -51,18 +54,8 @@ const booksSchema = new mongoose.Schema(
       enum: ["read", "reading", "want to read"],
     },
   },
-  {
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
-  }
 );
-/*
-booksSchema.virtual("reviews", {
-  ref: "Review",
-  foreignField: "bookID",
-  localField: "_id",
-});
-*/
+
 // Increment id of the book
 booksSchema.plugin(AutoIncrement, { inc_field: "ID" });
 

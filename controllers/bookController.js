@@ -2,8 +2,6 @@ const Book = require("../models/Book");
 const AppError = require("../utils/appError");
 const Author = require("../models/Author");
 const Category = require("../models/Category");
-const Review = require("./../models/Review");
-
 
 // eslint-disable-next-line consistent-return
 exports.getAllbooks = async (req, res, next) => {
@@ -147,7 +145,6 @@ exports.updateBook = async (req, res, next) => {
   }
 };
 
-// eslint-disable-next-line consistent-return
 exports.reviewBook = async (req, res, next) => {
   try {
     const { ratingBook, reviewBook } = req.body;
@@ -155,13 +152,15 @@ exports.reviewBook = async (req, res, next) => {
     const book = await Book.findById(req.params.id);
 
     if (!book) {
-      return next(new AppError('No book found with that ID', 404));
+      return next(new AppError("No book found with that ID", 404));
     }
 
     const review = {
       ratingBook: Number(ratingBook),
       reviewBook,
     };
+
+    book.rating = book.reviews.length;
 
     book.reviews.push(review);
     if (book.reviews.length === 0) {
@@ -172,12 +171,13 @@ exports.reviewBook = async (req, res, next) => {
         book.reviews.length;
     }
 
+    await book.save();
     res.status(201).json({
-      message: 'Book has a review now',
+      message: "Book has a review now",
     });
   } catch (error) {
     res.status(404).json({
-      status: 'fail',
+      status: "fail",
       message: error.message,
     });
   }
