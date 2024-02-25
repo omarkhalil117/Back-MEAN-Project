@@ -1,4 +1,7 @@
-const Category = require('../models/Category');
+const Category = require("../models/Category");
+const Book = require("../models/Book");
+const User = require("../models/User");
+const mongoose = require("mongoose");
 
 const getAllCategories = async (req, res) => {
   try {
@@ -13,16 +16,63 @@ const getCategoryById = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
-      return res.status(404).json({ message: 'Category not found' });
+      return res.status(404).json({ message: "Category not found" });
     }
-    res.status(200).json(category);
+
+    const books = await Book.find({ categoryID: req.params.id });
+    res.status(200).json({ categorycontent: category, booksbycategory: books });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const getPopularCategory = async (req, res) => {
+  try {
+    // const pipeline = [
+    //{ $match: { rating: { $gt:  0 } } },
+    //{ $group: { _id: "$categoryID", count: { $sum:  1 } } },
+    // { $sort: { count: -1 } },
+    //  { $limit:  5 }
+    // ];
+
+    const pipeline = [
+      { $match: { rating: { $gt: 0 } } },
+      { $group: { _id: "$categoryID", count: { $sum: 1 } } },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "_id",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      { $unwind: "$category" },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+    ];
+    const popularCategories = await Book.aggregate(pipeline);
+    console.log(popularCategories);
+    if (!popularCategories) {
+      return res.status(404).json({ message: "no popular category found" });
+    }
+    res.status(200).json(popularCategories);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
   return true;
 };
 
+ 
 const createCategory = async (req, res) => {
+  try {
+    const category = new Category(req.body);
+    const newCategory = await category.save();
+    res.status(200).json(newCategory);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
   try {
     const category = new Category(req.body);
     const newCategory = await category.save();
@@ -34,9 +84,11 @@ const createCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   try {
-    const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     if (!category) {
-      return res.status(404).json({ message: 'Category not found' });
+      return res.status(404).json({ message: "Category not found" });
     }
     res.json(category);
   } catch (err) {
@@ -45,13 +97,14 @@ const updateCategory = async (req, res) => {
   return true;
 };
 
+
 const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) {
-      return res.status(404).json({ message: 'Category not found' });
+      return res.status(404).json({ message: "Category not found" });
     }
-    res.status(200).json({ message: 'Category deleted' });
+    res.status(200).json({ message: "Category deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -64,4 +117,6 @@ module.exports = {
   createCategory,
   updateCategory,
   deleteCategory,
+  getCategoriesOfUser,
+  getPopularCategory,
 };
