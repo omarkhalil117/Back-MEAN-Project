@@ -45,7 +45,6 @@ const getUserBooksPop = catchAsync(async (req,res,next) => {
       {path:'categoryID' , model:'Category'}
     ] 
     })
-
   res.json({
     fullInfo
   })
