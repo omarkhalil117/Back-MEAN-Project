@@ -7,12 +7,17 @@ const {
   createCategory,
   updateCategory,
   deleteCategory,
+  getCategoriesOfUser,
+  getPopularCategory,
 } = require('../controllers/categoryController');
 
-router.get('/', getAllCategories);
-router.get('/:id', getCategoryById);
-router.post('/', createCategory);
-router.patch('/:id', updateCategory);
-router.delete('/:id', deleteCategory);
+router.get('/categories', getAllCategories);
+router.get('/categories/popular', getPopularCategory);
+router.get('/categories/:id', getCategoryById);
+router.get('/categories/user/:userId', getCategoriesOfUser);
+
+router.post('/categories', createCategory);
+router.patch('/categories/:id', updateCategory);
+router.delete('/categories/:id', deleteCategory);
 
 module.exports = router;

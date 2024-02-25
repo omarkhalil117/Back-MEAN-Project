@@ -1,4 +1,7 @@
+const mongoose = require('mongoose');
 const Category = require('../models/Category');
+const Book = require('../models/Book');
+const User = require('../models/User');
 
 const getAllCategories = async (req, res) => {
   try {
@@ -15,11 +18,66 @@ const getCategoryById = async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
-    res.status(200).json(category);
+
+    const books = await Book.find({ categoryID: req.params.id });
+    res.status(200).json({ categorycontent: category, booksbycategory: books });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-  return true;
+};
+
+const getPopularCategory = async (req, res) => {
+  try {
+    // const pipeline = [
+    // { $match: { rating: { $gt:  0 } } },
+    // { $group: { _id: "$categoryID", count: { $sum:  1 } } },
+    // { $sort: { count: -1 } },
+    //  { $limit:  5 }
+    // ];
+
+    const pipeline = [
+      { $match: { rating: { $gt: 0 } } },
+      { $group: { _id: '$categoryID', count: { $sum: 1 } } },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+      { $unwind: '$category' },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+    ];
+    const popularCategories = await Book.aggregate(pipeline);
+    console.log(popularCategories);
+    if (!popularCategories) {
+      return res.status(404).json({ message: 'no popular category found' });
+    }
+    res.status(200).json(popularCategories);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const getCategoriesOfUser = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.userId });
+    if (!user) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    const bookIds = user.books;
+
+    const categories = await Book.find({ _id: { $in: bookIds } }).populate(
+      'categoryID',
+    );
+    const categoryNames = categories.map((book) => book.categoryID);
+
+    res.status(200).json(categoryNames);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 const createCategory = async (req, res) => {
@@ -34,7 +92,9 @@ const createCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   try {
-    const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
@@ -42,7 +102,6 @@ const updateCategory = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-  return true;
 };
 
 const deleteCategory = async (req, res) => {
@@ -55,7 +114,6 @@ const deleteCategory = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-  return true;
 };
 
 module.exports = {
@@ -64,4 +122,6 @@ module.exports = {
   createCategory,
   updateCategory,
   deleteCategory,
+  getCategoriesOfUser,
+  getPopularCategory,
 };
