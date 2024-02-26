@@ -37,6 +37,31 @@ const getAllUsersBooks = catchAsync(async (req, res, next) => {
   });
 });
 
+const getUserBooksPop = catchAsync(async (req, res, next) => {
+  const fullInfo = await User.findById(req.params.id)
+    .populate({
+      path: 'books.book',
+      populate: [
+        { path: 'authorID', model: 'Authors' },
+        { path: 'categoryID', model: 'Category' },
+      ],
+    });
+  res.json({
+    fullInfo,
+  });
+});
+
+const updateUserBookShelve = catchAsync(async (req, res, next) => {
+  const updatedShelve = await User.updateOne(
+    { _id: req.params.id, 'books.book': req.params.bookId },
+    { $set: { 'books.$.shelve': req.body.shelve } },
+  );
+  res.json({ message: 'success', updatedShelve });
+});
+
 module.exports = {
-  addBookToUser, getAllUsersBooks,
+  addBookToUser,
+  getAllUsersBooks,
+  getUserBooksPop,
+  updateUserBookShelve,
 };
