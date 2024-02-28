@@ -1,6 +1,7 @@
-const User = require("../models/User");
-const catchAsync = require("../utils/catchAsync");
-const AppError = require("../utils/appError");
+const User = require('../models/User');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const mongoose = require('mongoose');
 
 const addBookToUser = catchAsync(async (req, res, next) => {
   const updatedUser = await User.findOneAndUpdate(
@@ -9,15 +10,15 @@ const addBookToUser = catchAsync(async (req, res, next) => {
 
     //! Do not add book twice if o do that iwill igonre second add but i will not throw an error
     { $addToSet: { books: req.params.bookId } },
-    { new: true }
+    { new: true },
   );
   if (!updatedUser) {
-    return next(new AppError("no user found, you are not logged in"), 401);
+    return next(new AppError('no user found, you are not logged in'), 401);
   }
 
   res.status(200).json({
-    status: "success",
-    message: "Book added to user successfully",
+    status: 'success',
+    message: 'Book added to user successfully',
     data: {
       user: updatedUser,
     },
@@ -25,74 +26,105 @@ const addBookToUser = catchAsync(async (req, res, next) => {
   return true;
 });
 
-// eslint-disable-next-line no-unused-vars
 const getAllUsersBooks = catchAsync(async (req, res, next) => {
-  // eslint-disable-next-line no-underscore-dangle
-  const userWithHisBooks = await User.findById(req.user._id).populate("books");
+  console.log("books")
+  const userWithHisBooks = await User.findById(req.body._id).populate('books');
   res.status(200).json({
-    status: "success",
+    status: 'success',
     data: {
       user: userWithHisBooks,
     },
   });
 });
 
-const getUserBooksPop = catchAsync(async (req, res, next) => {
-  const fullInfo = await User.findById(req.params.id).populate({
-    path: "books.book",
-    populate: [
-      { path: "authorID", model: "Authors" },
-      { path: "categoryID", model: "Category" },
-    ],
-  });
+const getUserBooksPop = catchAsync(async (req,res,next) => {
+  const limit = 2;
+  const page = req.params.num;
+  const fullInfo = await User.aggregate([
+  {$match: {_id: new mongoose.Types.ObjectId(req.params.id)}},
+  {$project: {_id:0,books:1}},
+  {$unwind:'$books'},
+  {$lookup : { from:'books' , localField: 'books.book' , foreignField: '_id', as: 'book' } },
+  {$unwind: '$book'},
+  {$lookup : { from:'authors' , localField: 'book.authorID' , foreignField: '_id' , as: 'author' }},
+  {$lookup : { from:'categories' , localField: 'book.categoryID' , foreignField: '_id' , as: 'category' }},
+  {$group: { _id: { book:'$book' , author: '$author' ,category: '$category',shelve: '$books',} }},
+  {$skip: page > 0 ? ( ( page - 1 ) * limit ) : 0},
+  {$limit:limit}
+  ]);
+
   res.json({
-    fullInfo,
-  });
-});
+    fullInfo
+  })
+})
 
-const updateUserBookShelve = catchAsync(async (req, res, next) => {
+const updateUserBookShelve = catchAsync(async (req,res,next) => {
   const updatedShelve = await User.updateOne(
-    { _id: req.params.id, "books.book": req.params.bookId },
-    { $set: { "books.$.shelve": req.body.shelve } }
-  );
-  res.json({ message: "success", updatedShelve });
+   { _id: req.params.id , 'books.book': req.params.bookId },
+   { $set: { 'books.$.shelve': req.body.shelve } }
+)
+  res.json({message:"success" , updatedShelve});
+})
+
+
+
+
+
+const generateToken = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRET, {
+  expiresIn: '1d',
 });
 
-const updateUserRating = catchAsync(async (req, res, next) => {
-  const updatedUserRate = await User.findOneAndUpdate(
-    { _id: req.params.id, "books.book": bookId },
-    { $set: { "books.$.rating": req.body } },
-    { new: true }
-  );
-
-  if (!updatedUserRate) {
-    return next(new AppError("User or book not found", 404));
+const login = catchAsync(async (req, res, next) => {
+  //! 1) check if email and password exist in body
+  const { userName, password } = req.body;
+  if (!userName || !password) {
+    return next(new AppError('Please provide userName and password', 400));
   }
-
-  res.status(200).json({
-    status: "success",
-    message: "Rating updated successfully",
-  });
-});
-
-const getUser = catchAsync(async (req, res, next) => {
+  //! 2) check if user exists and password is correct
+  const user = await User.findOne({ userName }).select('+password');
+  const correct = user.correctPassword(password, user.password);
+  if (!user || !correct) {
+    return next(new AppError('Incorrect email or password', 401));
+  }//! 3) if okay send token
   // eslint-disable-next-line no-underscore-dangle
-  const user = await User.findById(req.params.userId);
+  const token = generateToken(user._id, user.role);
   res.status(200).json({
     status: 'success',
+    token,
+  });
+  return true;
+});
+
+const register = catchAsync(async (req, res, next) => {
+  const {
+    userName, firstName, lastName, email,
+    password,
+
+  } = req.body;
+  const newUser = await User.create({
+    userName,
+    firstName,
+    lastName,
+    email,
+    password,
+  });
+  //! once your register you are logged in
+  // eslint-disable-next-line no-underscore-dangle
+  const token = generateToken(newUser._id);
+  res.status(201).json({
+    status: 'success',
+    token,
     data: {
-      user,
+      newUser,
     },
   });
 });
 
-
-
 module.exports = {
-  addBookToUser,
-  getAllUsersBooks,
-  getUserBooksPop,
+  addBookToUser, 
+  getAllUsersBooks, 
+  login, 
+  getUserBooksPop, 
+  register, 
   updateUserBookShelve,
-  updateUserRating,
-  getUser,
 };

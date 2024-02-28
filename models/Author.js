@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
-const { autoInc } = require('auto-increment-group');
+const { autoInc }= require('auto-increment-group')
 
 const schema = mongoose.Schema({
+  ID :{
+  type: String,
+  },
   firstName: {
     type: String,
     maxLength: 30,

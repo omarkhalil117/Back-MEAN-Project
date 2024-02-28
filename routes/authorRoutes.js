@@ -20,10 +20,22 @@ const router = express.Router();
 
 router.get('/', getAll);
 
+router.get('/:id/page/:num', async (req, res) => {
+  try{
+    console.log(1111111111111111 , req.params.num , req.params.id)
+    const authors = await findUserAuthors(req.params.num , req.params.id);
+    console.log(authors)
+    return res.json(authors);
+  } catch (err) {
+    return res.status(404).json({ message: err.message });
+  }
+})
+
 router.get('/:id', async (req, res) => {
   try {
     const author = await getOne(req.params.id);
-    return res.json(author);
+    const authorbooks = await getAuthorBooks(req.params.id);
+    return res.json({status:"succes", author , authorbooks});
   } catch (err) {
     return res.status(400).json({ message: err.message });
   }
@@ -66,5 +78,6 @@ router.delete('/:id', async (req, res) => {
     return res.status(400).json({ message: err.message });
   }
 });
+
 
 module.exports = router;

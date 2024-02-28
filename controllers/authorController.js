@@ -1,8 +1,11 @@
-const Authors = require('../models/Author');
+const Author = require('../models/Author');
+const Books = require('../models/Book');
+const User = require('../models/User')
+const mongoose = require('mongoose');
 
 const getAll = async (req, res) => {
   try {
-    const authors = await Authors.find({});
+    const authors = await Author.find({});
     if (!authors) {
       return res.status(404).json({ message: 'No authors found' });
     }
@@ -14,20 +17,20 @@ const getAll = async (req, res) => {
 // //////////////////////////////////////////////////////////////
 
 const getOne = async (id) => {
-  const author = await Authors.find({ _id: id });
+  const author = await Author.find({ _id: id });
   return author;
 };
 
 // //////////////////////////////////////////////////////////////
 
 const addAuthor = async (authorData) => {
-  const createdAuthor = await Authors.create(authorData);
+  const createdAuthor = await Author.create(authorData);
   return createdAuthor;
 };
 // //////////////////////////////////////////////////////////////
 
 const updateAuthor = async (id, update) => {
-  const updatedAuthor = await Authors.findOneAndUpdate({ _id: id }, update, {
+  const updatedAuthor = await Author.findOneAndUpdate({ _id: id }, update, {
     runValidators: true,
     new: true,
   });
@@ -36,9 +39,48 @@ const updateAuthor = async (id, update) => {
 // //////////////////////////////////////////////////////////////
 
 const deletAuthor = async (id) => {
-  const deleted = await Authors.deleteOne({ _id: id });
+  const deleted = await Author.deleteOne({ _id: id });
   return deleted;
 };
+
+// //////////////////////////////////////////////////////////////
+
+const getAuthorBooks = async (id) => {
+  const authorBooks = await Books.aggregate([
+    {$unwind:'$authorID'},
+    {$match : {authorID: id}}
+  ]);
+  return authorBooks;
+}
+
+// //////////////////////////////////////////////////////////////
+
+const getAuthorPage = async (pageNum) => {
+  const limit = 5 ;
+  const authors = await Author.find({}).sort({ _id:1 })
+  .skip(pageNum > 0 ? ( ( pageNum - 1 ) * limit ) : 0)
+  .limit(limit)
+  return authors;
+}
+
+// //////////////////////////////////////////////////////////////
+
+const findUserAuthors = async (page , id) => {
+  const limit = 5;
+  const authors = await User.aggregate([
+    {$match : { _id : new mongoose.Types.ObjectId(id) } },
+    {$project : { _id : 0, books : 1 }},
+    {$unwind : '$books'},
+    {$lookup : { from:'books' , localField: 'books.book' , foreignField: '_id', as: 'book' } },
+    {$unwind : '$book'},
+    {$lookup : { from :'authors' , localField: 'book.authorID' , foreignField: '_id' , as: 'author' }},
+    {$group : {_id : {authors:'$author'}} },
+    {$skip: page > 0 ? ( ( page - 1 ) * limit ) : 0},
+    {$limit:limit}
+    ]);
+  return authors
+  
+}
 
 module.exports = {
   getAll,
@@ -46,4 +88,7 @@ module.exports = {
   updateAuthor,
   deletAuthor,
   getOne,
+  getAuthorBooks,
+  getAuthorPage,
+  findUserAuthors,
 };
