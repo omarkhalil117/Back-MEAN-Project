@@ -60,7 +60,6 @@ const updateUserBookShelve = catchAsync(async (req, res, next) => {
 });
 
 const getUser = catchAsync(async (req, res, next) => {
-  console.log(555555555555, req.params);
   // eslint-disable-next-line no-underscore-dangle
   const user = await User.findById(req.params.userId);
   res.status(200).json({
@@ -76,7 +75,5 @@ module.exports = {
   getAllUsersBooks,
   getUserBooksPop,
   updateUserBookShelve,
-  addBookToUser,
-  getAllUsersBooks,
   getUser,
 };

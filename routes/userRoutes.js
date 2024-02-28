@@ -3,8 +3,13 @@ const multer = require('multer');
 const {
   register, login, protect, specifyRole,
 } = require('../controllers/authController');
-const { addBookToUser, getAllUsersBooks, getUserBooksPop, updateUserBookShelve } = require('../controllers/userController');
-const { addBookToUser, getAllUsersBooks, getUser } = require('../controllers/userController');
+const {
+  addBookToUser,
+  getAllUsersBooks,
+  getUserBooksPop,
+  updateUserBookShelve,
+  getUser,
+} = require('../controllers/userController');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
