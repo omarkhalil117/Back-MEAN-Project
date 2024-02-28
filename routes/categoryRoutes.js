@@ -1,5 +1,7 @@
 const express = require('express');
 
+const express = require('express');
+
 const router = express.Router();
 const {
   getAllCategories,
@@ -9,15 +11,20 @@ const {
   deleteCategory,
   getCategoriesOfUser,
   getPopularCategory,
+  getPopularAuthors,
+  pagination
 } = require('../controllers/categoryController');
 
-router.get('/', getAllCategories);
-router.get('/popular', getPopularCategory);
-router.get('/:id', getCategoryById);
-router.get('/user/:userId', getCategoriesOfUser);
-
-router.post('/', createCategory);
-router.patch('/:id', updateCategory);
-router.delete('/:id', deleteCategory);
+router.get('/categories', getAllCategories);
+router.get('/categories/popular', getPopularCategory);
+router.get('/author/popular', getPopularAuthors);
+router.get('/categories/:id', getCategoryById);
+router.get('/categories/page/:id', pagination);
+router.get('/categories/user/:userId', getCategoriesOfUser);
+ 
+ 
+router.post('/categories', createCategory);
+router.patch('/categories/:id', updateCategory);
+router.delete('/categories/:id', deleteCategory);
 
 module.exports = router;

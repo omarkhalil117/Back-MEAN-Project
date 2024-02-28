@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const Category = require('../models/Category');
 const Book = require('../models/Book');
+const Author = require('../models/Author');
 const User = require('../models/User');
+ 
 
 const getAllCategories = async (req, res) => {
   try {
@@ -56,6 +58,37 @@ const getPopularCategory = async (req, res) => {
       return res.status(404).json({ message: 'no popular category found' });
     }
     res.status(200).json(popularCategories);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+const getPopularAuthors = async (req, res) => {
+  try {
+    
+
+    const pipeline = [
+      { $match: { rating: { $gt: 0 } } },
+      { $group: { _id: '$authorID', count: { $sum: 1 } } },
+      {
+        $lookup: {
+          from: 'authors',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'author',
+        },
+      },
+      { $unwind: '$author' },
+      { $sort: { count: -1 } },
+      { $limit: 2 },
+    ];
+    const popularAuthors = await Book.aggregate(pipeline);
+    console.log(popularAuthors);
+    if (!popularAuthors) {
+      return res.status(404).json({ message: 'no popular category found' });
+    }
+    res.status(200).json(popularAuthors);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -116,6 +149,42 @@ const deleteCategory = async (req, res) => {
   }
 };
 
+ 
+
+const pagination =async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 2;
+    const startIndex = (page - 1) * limit;
+
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    const books = await Book.find({ categoryID: req.params.id }).populate(
+      'authorID',
+    )
+      .skip(startIndex)
+      .limit(limit)
+      .exec();
+
+      res.status(200).json({ categorycontent: category, booksbycategory: books });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+ 
+
+ 
+
+ 
+
+
+
 module.exports = {
   getAllCategories,
   getCategoryById,
@@ -124,4 +193,6 @@ module.exports = {
   deleteCategory,
   getCategoriesOfUser,
   getPopularCategory,
+  getPopularAuthors,
+  pagination
 };

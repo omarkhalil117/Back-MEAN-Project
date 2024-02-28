@@ -13,13 +13,18 @@ const reviewsSchema = new mongoose.Schema(
 );
 
 const booksSchema = new mongoose.Schema({
+  ID: {
+    type: Number,
+  },
   authorID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Authors",
-    required: [true, "Book must have an author"],
+    ref: 'Authors',
+    // required: [true, 'Book must have an author'],
   },
   categoryID: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: 'Categories',
+    // required: [true, 'Book must have a category'],
     ref: "Category",
     required: [true, "Book must have a category"],
   },
@@ -28,6 +33,12 @@ const booksSchema = new mongoose.Schema({
     required: [true, "Book must have a name"],
     minlength: [3, "Min length of title is 3"],
     maxlength: [30, "Max length of title is 30"],
+  },
+  reviews: {
+    type: [reviewsSchema],
+  },
+  reviews: {
+    type: [reviewsSchema],
   },
   reviews: {
     type: [reviewsSchema],
