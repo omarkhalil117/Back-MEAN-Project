@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-
+const mongoose = require('mongoose')
 const addBookToUser = catchAsync(async (req, res, next) => {
   const updatedUser = await User.findOneAndUpdate(
     // eslint-disable-next-line no-underscore-dangle
@@ -37,14 +37,21 @@ const getAllUsersBooks = catchAsync(async (req, res, next) => {
 });
 
 const getUserBooksPop = catchAsync(async (req,res,next) => {
-  const fullInfo = await User.findById(req.params.id)
-  .populate({
-    path : 'books.book',
-    populate : [
-      {path:'authorID' , model:'Authors'},
-      {path:'categoryID' , model:'Category'}
-    ] 
-    })
+  const limit = 1;
+  const page = req.params.num;
+  const fullInfo = await User.aggregate([
+  {$match: {_id: new mongoose.Types.ObjectId(req.params.id)}},
+  {$project: {_id:0,books:1}},
+  {$unwind:'$books'},
+  {$lookup : { from:'books' , localField: 'books.book' , foreignField: '_id', as: 'book' } },
+  {$unwind: '$book'},
+  {$lookup : { from:'authors' , localField: 'book.authorID' , foreignField: '_id' , as: 'author' }},
+  {$lookup : { from:'categories' , localField: 'book.categoryID' , foreignField: '_id' , as: 'category' }},
+  {$group: { _id: { book:'$book' , author: '$author' ,category: '$category',shelve: '$books',} }},
+  {$skip: page > 0 ? ( ( page - 1 ) * limit ) : 0},
+  {$limit:limit}
+  ]);
+
   res.json({
     fullInfo
   })
@@ -57,6 +64,10 @@ const updateUserBookShelve = catchAsync(async (req,res,next) => {
 )
   res.json({message:"success" , updatedShelve});
 })
+
+
+
+
 
 const generateToken = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRET, {
   expiresIn: '1d',
@@ -114,5 +125,5 @@ module.exports = {
   login, 
   getUserBooksPop, 
   register, 
-  updateUserBookShelve
+  updateUserBookShelve,
 };

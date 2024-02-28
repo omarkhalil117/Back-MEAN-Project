@@ -11,7 +11,6 @@ router.get('/books', getAllUsersBooks);
 
 router.patch('/:id/book/:bookId', updateUserBookShelve);
 
-router.get('/:id', getUserBooksPop);
-
+router.get('/:id/page/:num', getUserBooksPop);
 
 module.exports = router;

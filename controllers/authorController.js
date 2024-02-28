@@ -1,5 +1,8 @@
 const Author = require('../models/Author');
-const Books = require('../models/Book')
+const Books = require('../models/Book');
+const User = require('../models/User')
+const mongoose = require('mongoose');
+
 const getAll = async (req, res) => {
   try {
     const authors = await Author.find({});
@@ -60,6 +63,27 @@ const getAuthorPage = async (pageNum) => {
   .limit(limit)
   return authors;
 }
+
+// //////////////////////////////////////////////////////////////
+
+const findUserAuthors = async (page , id) => {
+  console.log(222222222222)
+  const limit = 5;
+  const authors = await User.aggregate([
+    {$match : { _id : new mongoose.Types.ObjectId(id) } },
+    {$project : { _id : 0, books : 1 }},
+    {$unwind : '$books'},
+    {$lookup : { from:'books' , localField: 'books.book' , foreignField: '_id', as: 'book' } },
+    {$unwind : '$book'},
+    {$lookup : { from :'authors' , localField: 'book.authorID' , foreignField: '_id' , as: 'author' }},
+    {$group : {_id : {authors:'$author'}} },
+    {$skip: page > 0 ? ( ( page - 1 ) * limit ) : 0},
+    {$limit:limit}
+    ]);
+  return authors
+  
+}
+
 module.exports = {
   getAll,
   addAuthor,
@@ -67,5 +91,6 @@ module.exports = {
   deletAuthor,
   getOne,
   getAuthorBooks,
-  getAuthorPage
+  getAuthorPage,
+  findUserAuthors,
 };

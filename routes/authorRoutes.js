@@ -1,11 +1,22 @@
 const express = require('express');
 const {
-  getAll, addAuthor, updateAuthor, deletAuthor, getOne, getAuthorBooks, getAuthorPage,
+  getAll, addAuthor, updateAuthor, deletAuthor, getOne, getAuthorBooks, getAuthorPage, findUserAuthors,
 } = require('../controllers/authorController');
 
 const router = express.Router();
 
 router.get('/', getAll);
+
+router.get('/:id/page/:num', async (req, res) => {
+  try{
+    console.log(1111111111111111 , req.params.num , req.params.id)
+    const authors = await findUserAuthors(req.params.num , req.params.id);
+    console.log(authors)
+    return res.json(authors);
+  } catch (err) {
+    return res.status(404).json({ message: err.message });
+  }
+})
 
 router.get('/:id', async (req, res) => {
   try {
@@ -44,12 +55,5 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-router.get('/page/:num', async (req, res) => {
-  try{
-    const authors = await getAuthorPage(req.params.num);
-    return res.json(authors);
-  } catch (err) {
-    return res.status(404).json({ message: err.message });
-  }
-})
+
 module.exports = router;
