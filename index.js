@@ -15,7 +15,7 @@ dotenv.config('.env');
 app.use(cors());
 app.use(express.json());
 app.use(express.static('uploads'));
-
+dotenv.config('.env');
 mongoose.connect(process.env.MONGODB_URI_LOCAL)
   .then(() => console.log('Connected to db'))
   .catch((err) => console.log(err));
