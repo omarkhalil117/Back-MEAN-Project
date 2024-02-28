@@ -1,22 +1,9 @@
 const express = require('express');
 const multer = require('multer');
-const multer = require('multer');
 const bookController = require('../controllers/bookController');
 const auth = require('../controllers/authController');
 
 const router = express.Router();
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now();
-    cb(null, uniqueSuffix + file.originalname);
-  },
-});
-
-const upload = multer({ storage });
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

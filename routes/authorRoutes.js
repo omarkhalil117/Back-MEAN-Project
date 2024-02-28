@@ -1,21 +1,8 @@
 const express = require('express');
 const multer = require('multer');
-const multer = require('multer');
 const {
   getAll, addAuthor, updateAuthor, deletAuthor, getOne,
 } = require('../controllers/authorController');
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now();
-    cb(null, uniqueSuffix + file.originalname);
-  },
-});
-//! upload photo
-const upload = multer({ storage });
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
