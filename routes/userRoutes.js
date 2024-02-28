@@ -9,6 +9,7 @@ const {
   getUserBooksPop,
   updateUserBookShelve,
   getUser,
+  updateUserRating
 } = require('../controllers/userController');
 
 const storage = multer.diskStorage({

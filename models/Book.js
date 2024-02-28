@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const reviewsSchema = new mongoose.Schema(
   {
@@ -45,14 +44,7 @@ const booksSchema = new mongoose.Schema({
     type: String,
     // required: [true, 'Book must have a cover'],
   },
-  shelve: {
-    type: String,
-    enum: ["read", "reading", "want to read"],
-  },
 });
-
-// Increment id of the book
-booksSchema.plugin(AutoIncrement, { inc_field: "ID" });
 
 const Books = mongoose.model("Books", booksSchema);
 
