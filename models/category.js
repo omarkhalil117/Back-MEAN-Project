@@ -1,13 +1,17 @@
 const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const categorySchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
-  } ,
+    required: true,
+    unique: true,
+  },
+  ID: {
+    type: Number,
+  },
 });
-
-  
+categorySchema.plugin(AutoIncrement, { inc_field: 'ID' });
 
 const Category = mongoose.model('Category', categorySchema);
 

@@ -13,7 +13,10 @@ const schema = mongoose.Schema({
     minLength: 3,
     required: true,
   },
-  dob: Date,
+  dob: {
+    type: Date,
+  },
+  photo: String,
 });
 
 const Authors = mongoose.model('Authors', schema);
