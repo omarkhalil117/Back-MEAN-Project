@@ -1,184 +1,140 @@
 const Book = require("../models/Book");
+const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Author = require("../models/Author");
-const Category = require("../models/Category");
 
 // eslint-disable-next-line consistent-return
-exports.getAllbooks = async (req, res, next) => {
-  try {
-    const books = await Book.find().populate({
+exports.getAllbooks = catchAsync(async (req, res, next) => {
+  const page = req.query.page * 1 || 0;
+  const limit = 8;
+  const skip = page * limit;
+
+  const books = await Book.find()
+    .populate({
       path: "authorID",
       model: Author,
       select: "firstName lastName",
-    });
+    })
+    .skip(skip)
+    .limit(limit);
 
-    if (!books || books.length === 0) {
-      return next(new AppError("No books found", 404));
-    }
-    return res.status(200).json({
-      status: "success",
-      data: {
-        books,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error.message,
-    });
+  if (!books || books.length === 0) {
+    return next(new AppError("No books found", 404));
   }
-};
 
-// eslint-disable-next-line consistent-return
-exports.getBook = async (req, res, next) => {
-  try {
-    const book = await Book.findById(req.params.id)
-      .populate({
-        path: "authorID",
-        model: Author,
-        select: "firstName lastName",
-      })
-      .populate({
-        path: "categoryID",
-        model: Category,
-        select: "name",
-      })
-      .populate({
-        path: "reviews",
-        model: Review,
-        select: "reviewBook",
-      });
-
-    if (!book) {
-      return next(new AppError("No book found", 404));
-    }
-
-    return res.status(200).json({
-      status: "success",
-      data: {
-        book,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error.message,
-    });
-  }
+  res.status(200).json({
+    status: "success",
+    result: books.length,
+    data: {
+      books,
+    },
+  });
   return true;
-};
-
-exports.createBook = async (req, res) => {
-  try {
-    if (req.file) {
-      //! put photo url in body that will be sent to mongodb
-      req.body.cover = req.file.filename;
-    }
-    const newBook = await Book.create(req.body);
-
-    res.status(201).json({
-      status: "success",
-      data: {
-        Book: newBook,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error.message,
-    });
-  }
-};
+});
 
 // eslint-disable-next-line consistent-return
-exports.deleteBook = async (req, res, next) => {
-  try {
-    const deletedBook = await Book.findByIdAndDelete(req.params.id);
+exports.getBook = catchAsync(async (req, res, next) => {
+  const book = await Book.findById(req.params.id)
+    .populate("authorID")
+    .populate("categoryID");
 
-    if (!deletedBook) {
-      return next(new AppError("No book found", 404));
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: "Book deleted successfully",
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error.message,
-    });
+  if (!book) {
+    return next(new AppError("No book found", 404));
   }
-};
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      book,
+    },
+  });
+  return true;
+});
+
+exports.createBook = catchAsync(async (req, res) => {
+  if (req.file) {
+    //! put photo url in body that will be sent to mongodb
+    req.body.cover = req.file.filename;
+  }
+  const newBook = await Book.create(req.body);
+
+  res.status(201).json({
+    status: "success",
+    data: {
+      Book: newBook,
+    },
+  });
+});
 
 // eslint-disable-next-line consistent-return
-exports.updateBook = async (req, res, next) => {
-  try {
-    if (req.file) {
-      //! put photo url in body that will be sent to mongodb
-      req.body.cover = req.file.filename;
-    }
-    // const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body);
-    const updatedBook = await Book.findOneAndUpdate(
-      { _id: req.params.id },
-      req.body,
-      {
-        new: true,
-      }
-    );
+exports.deleteBook = catchAsync(async (req, res, next) => {
+  const deletedBook = await Book.findByIdAndDelete(req.params.id);
 
-    if (!updatedBook) {
-      return next(new AppError("No book found", 404));
-    }
-
-    res.status(200).json({
-      status: "success",
-      data: {
-        updatedBook,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error.message,
-    });
+  if (!deletedBook) {
+    return next(new AppError("No book found", 404));
   }
-};
 
-exports.reviewBook = async (req, res, next) => {
-  try {
-    const { ratingBook, reviewBook } = req.body;
+  res.status(200).json({
+    status: "success",
+    message: "Book deleted successfully",
+  });
+});
 
-    const book = await Book.findById(req.params.id);
-
-    if (!book) {
-      return next(new AppError("No book found with that ID", 404));
-    }
-
-    const review = {
-      ratingBook: Number(ratingBook),
-      reviewBook,
-    };
-
-    book.rating = book.reviews.length;
-
-    book.reviews.push(review);
-    if (book.reviews.length === 0) {
-      book.avgRate = 0;
-    } else {
-      book.avgRate =
-        book.reviews.reduce((total, item) => total + item.ratingBook, 0) /
-        book.reviews.length;
-    }
-
-    await book.save();
-    res.status(201).json({
-      message: "Book has a review now",
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: "fail",
-      message: error.message,
-    });
+// eslint-disable-next-line consistent-return
+exports.updateBook = catchAsync(async (req, res, next) => {
+  if (req.file) {
+    //! put photo url in body that will be sent to mongodb
+    req.body.cover = req.file.filename;
   }
-};
+  // const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body);
+  const updatedBook = await Book.findOneAndUpdate(
+    { _id: req.params.id },
+    req.body,
+    {
+      new: true,
+    }
+  );
+
+  if (!updatedBook) {
+    return next(new AppError("No book found", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      updatedBook,
+    },
+  });
+});
+
+exports.reviewBook = catchAsync(async (req, res, next) => {
+  const { ratingBook, reviewBook } = req.body;
+
+  const book = await Book.findById(req.params.id);
+
+  if (!book) {
+    return next(new AppError("No book found with that ID", 404));
+  }
+
+  const review = {
+    ratingBook: Number(ratingBook),
+    reviewBook,
+  };
+
+  book.rating = book.reviews.length + 1;
+
+  book.reviews.push(review);
+  if (book.reviews.length === 0) {
+    book.avgRate = 0;
+  } else {
+    book.avgRate = (
+      book.reviews.reduce((total, item) => total + item.ratingBook, 0) /
+      book.reviews.length
+    ).toFixed();
+  }
+
+  await book.save();
+  res.status(201).json({
+    message: "Book has a review now",
+  });
+});
