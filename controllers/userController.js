@@ -66,9 +66,33 @@ const updateUserBookShelve = catchAsync(async (req,res,next) => {
   res.json({message:"success" , updatedShelve});
 })
 
+const updateUserRating = catchAsync(async (req, res, next) => {
+  const updatedUserRate = await User.findOneAndUpdate(
+    { _id: req.params.id, "books.book": bookId },
+    { $set: { "books.$.rating": req.body } },
+    { new: true }
+  );
 
+  if (!updatedUserRate) {
+    return next(new AppError("User or book not found", 404));
+  }
 
+  res.status(200).json({
+    status: "success",
+    message: "Rating updated successfully",
+  });
+});
 
+const getUser = catchAsync(async (req, res, next) => {
+  // eslint-disable-next-line no-underscore-dangle
+  const user = await User.findById(req.params.userId);
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+});
 
 const generateToken = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRET, {
   expiresIn: '1d',
@@ -127,4 +151,6 @@ module.exports = {
   getUserBooksPop, 
   register, 
   updateUserBookShelve,
+  updateUserRating,
+  getUser,
 };

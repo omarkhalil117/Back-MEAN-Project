@@ -18,10 +18,6 @@ exports.getAllbooks = catchAsync(async (req, res, next) => {
     .skip(skip)
     .limit(limit);
 
-  if (!books || books.length === 0) {
-    return next(new AppError("No books found", 404));
-  }
-
   res.status(200).json({
     status: "success",
     result: books.length,
