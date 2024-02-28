@@ -20,4 +20,6 @@ router.patch('/:id/book/:bookId', updateUserBookShelve);
 
 router.get('/:id', getUserBooksPop);
 
+router.patch('/:id/book/:bookId', updateUserRating);
+
 module.exports = router;
