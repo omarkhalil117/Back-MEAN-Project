@@ -1,11 +1,12 @@
+const { Query } = require('mongoose');
 const Book = require('../models/Book');
 const AppError = require('../utils/appError');
 
 // eslint-disable-next-line consistent-return
 exports.getAllbooks = async (req, res, next) => {
   try {
-    const books = await Book.find();
-
+    const books = await Book.find().populate('categoryID').populate('authorID');
+    console.log(books);
     if (!books || books.length === 0) {
       return next(new AppError('No books found', 404));
     }
@@ -53,8 +54,10 @@ exports.createBook = async (req, res) => {
       //! put photo url in body that will be sent to mongodb
       req.body.cover = req.file.filename;
     }
-    const newBook = await Book.create(req.body);
-
+    //! I hit DB twice as create does not return Query to chain and populate!!!!!!
+    let newBook = await Book.create(req.body);
+    // eslint-disable-next-line no-underscore-dangle
+    newBook = await Book.findById(newBook._id).populate('categoryID').populate('authorID');
     res.status(201).json({
       status: 'success',
       data: {
@@ -128,7 +131,7 @@ exports.reviewBook = async (req, res, next) => {
     const book = await Book.findById(req.params.id);
 
     if (!book) {
-      return next(new AppError("No book found with that ID", 404));
+      return next(new AppError('No book found with that ID', 404));
     }
 
     const review = {
@@ -145,7 +148,7 @@ exports.reviewBook = async (req, res, next) => {
     }
 
     res.status(201).json({
-      message: "Book has a review now",
+      message: 'Book has a review now',
     });
   } catch (error) {
     res.status(404).json({
@@ -163,7 +166,7 @@ exports.reviewBook = async (req, res, next) => {
     const book = await Book.findById(req.params.id);
 
     if (!book) {
-      return next(new AppError("No book found with that ID", 404));
+      return next(new AppError('No book found with that ID', 404));
     }
 
     const review = {
@@ -180,11 +183,11 @@ exports.reviewBook = async (req, res, next) => {
     }
 
     res.status(201).json({
-      message: "Book has a review now",
+      message: 'Book has a review now',
     });
   } catch (error) {
     res.status(404).json({
-      status: "fail",
+      status: 'fail',
       message: error.message,
     });
   }

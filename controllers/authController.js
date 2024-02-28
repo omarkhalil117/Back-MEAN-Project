@@ -12,18 +12,30 @@ const generateToken = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRE
 
 // eslint-disable-next-line no-unused-vars
 const register = catchAsync(async (req, res, next) => {
-  console.log('hit me!');
+  let decoded
+  if(req.headers.authorization){
+     decoded = await promisify(jwt.verify)(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
+  }
+  if (req.file) {
+    //! put photo url in body that will be sent to mongodb
+    req.body.image = req.file.filename;
+  }
   const {
     userName, firstName, lastName, email,
-    password,
+    password,image
 
   } = req.body;
+  if(decoded.role === 'admin'){
+    role = 'admin'
+  }
   const newUser = await User.create({
     userName,
     firstName,
     lastName,
     email,
     password,
+    image,
+    role
   });
   //! once your register you are logged in
   // eslint-disable-next-line no-underscore-dangle
@@ -39,21 +51,28 @@ const register = catchAsync(async (req, res, next) => {
 
 const login = catchAsync(async (req, res, next) => {
   //! 1) check if email and password exist in body
-  const { userName, password } = req.body;
+  const { userName, password, role } = req.body;
   if (!userName || !password) {
     return next(new AppError('Please provide userName and password', 400));
   }
   //! 2) check if user exists and password is correct
   const user = await User.findOne({ userName }).select('+password');
-  const correct = user.correctPassword(password, user.password);
+  const correct = await user?.correctPassword(password, user.password);
   if (!user || !correct) {
     return next(new AppError('Incorrect email or password', 401));
-  }//! 3) if okay send token
+  }
+  if(role === 'admin'  && user.role !== 'admin'){
+    return next(new AppError(`Unauthorized as your are not ${req.body.role} 😒`, 401));
+  }
+  //! 3) if okay send token
   // eslint-disable-next-line no-underscore-dangle
   const token = generateToken(user._id, user.role);
   res.status(200).json({
     status: 'success',
     token,
+    data: {
+      user,
+    },
   });
   return true;
 });
@@ -61,6 +80,7 @@ const login = catchAsync(async (req, res, next) => {
 const protect = catchAsync(async (req, res, next) => {
   //! 1) Getting token and check of it's there
   let token;
+  console.log(req.headers.authorization)
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     [, token] = req.headers.authorization.split(' ');
   }
@@ -100,6 +120,6 @@ const specifyRole = (role) => (req, res, next) => {
   }
 };
 
-const adminAddAdmin = module.exports = {
+module.exports = {
   register, login, protect, specifyRole,
 };

@@ -27,23 +27,23 @@ const handleDuplicateFieldsDB = (err) => {
 // eslint-disable-next-line no-unused-vars
 module.exports = (err, req, res, next) => {
   //! nice trick to not to mutate object even if object has reference data type 😉
-  let error = JSON.parse(JSON.stringify(err));
-  error.statusCode = error.statusCode || 500;
-  error.status = error.status || 'Internal Server Error..';
-  if (error.message === 'data and salt arguments required') error = new AppError('Password is requireed', 400);
-  if (error.name === 'CastError') error = handleCastErrorDB(error);
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'Internal Server Error..';
+  if (err.message === 'data and salt arguments required') err = new AppError('Password is requireed', 400);
+  if (err.name === 'CastError') err = handleCastErrorDB(err);
   if (err.code === 11000) {
-    error = handleDuplicateFieldsDB(error);
+    err = handleDuplicateFieldsDB(err);
   }
-  if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
-  if (error.name === 'JsonWebTokenError') error = handleJWTError();
-  if (error.name === 'TokenExpiredError') error = handleExpiredError();
+  if (err.name === 'ValidationError') err = handleValidationErrorDB(err);
+  if (err.name === 'JsonWebTokenError') err = handleJWTError();
+  if (err.name === 'TokenExpiredError') err = handleExpiredError();
 
-  if (error.isOperational) {
-    res.status(error.statusCode).json({
-      status: error.status,
-      message: error.message,
+  if (err.isOperational) {
+    res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
     });
+    console.log(err.message);
   } else {
     console.error('ERROR 😢', err);
     res.status(500).json({

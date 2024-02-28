@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { autoInc } = require('auto-increment-group');
 
 const schema = mongoose.Schema({
   firstName: {
@@ -17,6 +18,17 @@ const schema = mongoose.Schema({
     type: Date,
   },
   photo: String,
+  ID: {
+    type: String,
+  },
+});
+
+schema.plugin(autoInc, {
+  field: 'ID',
+  unique: true,
+  digits: 1,
+  startAt: 1,
+  incrementBy: 1,
 });
 
 const Authors = mongoose.model('Authors', schema);

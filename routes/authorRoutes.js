@@ -45,6 +45,8 @@ router.post('/', upload.single('photo'), async (req, res) => {
 //! layer for upload will put info in next middleware
 router.patch('/:id', upload.single('photo'), async (req, res) => {
   try {
+    console.log(req.body);
+    console.log('___________________________________________________________________________________');
     if (req.file) {
       //! put photo url in body that will be sent to mongodb
       req.body.photo = req.file.filename;

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const reviewsSchema = new mongoose.Schema({
   ratingBook: {
@@ -11,9 +10,6 @@ const reviewsSchema = new mongoose.Schema({
 }, { _id: false });
 
 const booksSchema = new mongoose.Schema({
-  ID: {
-    type: Number,
-  },
   authorID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Authors',
@@ -21,7 +17,7 @@ const booksSchema = new mongoose.Schema({
   },
   categoryID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Categories',
+    ref: 'Category',
     // required: [true, 'Book must have a category'],
   },
   name: {
@@ -48,9 +44,6 @@ const booksSchema = new mongoose.Schema({
     enum: ['read', 'reading', 'want to read'],
   },
 });
-
-// Increment id of the book
-booksSchema.plugin(AutoIncrement, { inc_field: 'ID' });
 
 const Books = mongoose.model('Books', booksSchema);
 

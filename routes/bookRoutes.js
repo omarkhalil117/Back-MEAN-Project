@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const bookController = require('../controllers/bookController');
+const auth = require('../controllers/authController');
 
 const router = express.Router();
 
@@ -18,13 +19,13 @@ const upload = multer({ storage });
 
 router
   .route('/')
-  .get(bookController.getAllbooks)
-  .post(upload.single('cover'), bookController.createBook);
+  .get(auth.protect, bookController.getAllbooks)
+  .post(auth.protect, auth.specifyRole('admin'), upload.single('cover'), bookController.createBook);
 
 router
   .route('/:id')
   .get(bookController.getBook)
-  .patch(upload.single('cover'), bookController.updateBook)
-  .delete(bookController.deleteBook);
+  .patch(auth.protect, auth.specifyRole('admin'), upload.single('cover'), bookController.updateBook)
+  .delete(auth.protect, auth.specifyRole('admin'), bookController.deleteBook);
 
 module.exports = router;
