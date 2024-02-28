@@ -44,4 +44,6 @@ router.get('/:id', getUserBooksPop);
 
 router.get('/:userId', getUser);
 
+router.patch('/:id/book/:bookId', updateUserRating);
+
 module.exports = router;

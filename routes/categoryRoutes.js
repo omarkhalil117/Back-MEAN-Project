@@ -11,13 +11,13 @@ const {
   getPopularCategory,
 } = require('../controllers/categoryController');
 
-router.get('/categories', getAllCategories);
-router.get('/categories/popular', getPopularCategory);
-router.get('/categories/:id', getCategoryById);
-router.get('/categories/user/:userId', getCategoriesOfUser);
+router.get('/', getAllCategories);
+router.get('/popular', getPopularCategory);
+router.get('/:id', getCategoryById);
+router.get('/user/:userId', getCategoriesOfUser);
 
-router.post('/categories', createCategory);
-router.patch('/categories/:id', updateCategory);
-router.delete('/categories/:id', deleteCategory);
+router.post('/', createCategory);
+router.patch('/:id', updateCategory);
+router.delete('/:id', deleteCategory);
 
 module.exports = router;

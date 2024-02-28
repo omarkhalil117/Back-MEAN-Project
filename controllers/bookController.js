@@ -1,194 +1,140 @@
-const { Query } = require('mongoose');
-const Book = require('../models/Book');
-const AppError = require('../utils/appError');
+const Book = require("../models/Book");
+const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
+const Author = require("../models/Author");
 
 // eslint-disable-next-line consistent-return
-exports.getAllbooks = async (req, res, next) => {
-  try {
-    const books = await Book.find().populate('categoryID').populate('authorID');
-    console.log(books);
-    if (!books || books.length === 0) {
-      return next(new AppError('No books found', 404));
-    }
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        books,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
+exports.getAllbooks = catchAsync(async (req, res, next) => {
+  const page = req.query.page * 1 || 0;
+  const limit = 8;
+  const skip = page * limit;
+
+  const books = await Book.find()
+    .populate({
+      path: "authorID",
+      model: Author,
+      select: "firstName lastName",
+    })
+    .skip(skip)
+    .limit(limit);
+
+  if (!books || books.length === 0) {
+    return next(new AppError("No books found", 404));
   }
-};
 
-// eslint-disable-next-line consistent-return
-exports.getBook = async (req, res, next) => {
-  try {
-    const book = await Book.findById(req.params.id);
-
-    if (!book) {
-      return next(new AppError('No book found', 404));
-    }
-
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        book,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
-  }
+  res.status(200).json({
+    status: "success",
+    result: books.length,
+    data: {
+      books,
+    },
+  });
   return true;
-};
-
-exports.createBook = async (req, res) => {
-  try {
-    if (req.file) {
-      //! put photo url in body that will be sent to mongodb
-      req.body.cover = req.file.filename;
-    }
-    //! I hit DB twice as create does not return Query to chain and populate!!!!!!
-    let newBook = await Book.create(req.body);
-    // eslint-disable-next-line no-underscore-dangle
-    newBook = await Book.findById(newBook._id).populate('categoryID').populate('authorID');
-    res.status(201).json({
-      status: 'success',
-      data: {
-        Book: newBook,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
-  }
-};
+});
 
 // eslint-disable-next-line consistent-return
-exports.deleteBook = async (req, res, next) => {
-  try {
-    const deletedBook = await Book.findByIdAndDelete(req.params.id);
+exports.getBook = catchAsync(async (req, res, next) => {
+  const book = await Book.findById(req.params.id)
+    .populate("authorID")
+    .populate("categoryID");
 
-    if (!deletedBook) {
-      return next(new AppError('No book found', 404));
-    }
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Book deleted successfully',
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
+  if (!book) {
+    return next(new AppError("No book found", 404));
   }
-};
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      book,
+    },
+  });
+  return true;
+});
+
+exports.createBook = catchAsync(async (req, res) => {
+  if (req.file) {
+    //! put photo url in body that will be sent to mongodb
+    req.body.cover = req.file.filename;
+  }
+  const newBook = await Book.create(req.body);
+
+  res.status(201).json({
+    status: "success",
+    data: {
+      Book: newBook,
+    },
+  });
+});
 
 // eslint-disable-next-line consistent-return
-exports.updateBook = async (req, res, next) => {
-  try {
-    if (req.file) {
-      //! put photo url in body that will be sent to mongodb
-      req.body.cover = req.file.filename;
-    }
-    // const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body);
-    const updatedBook = await Book.findOneAndUpdate({ _id: req.params.id }, req.body, {
+exports.deleteBook = catchAsync(async (req, res, next) => {
+  const deletedBook = await Book.findByIdAndDelete(req.params.id);
+
+  if (!deletedBook) {
+    return next(new AppError("No book found", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Book deleted successfully",
+  });
+});
+
+// eslint-disable-next-line consistent-return
+exports.updateBook = catchAsync(async (req, res, next) => {
+  if (req.file) {
+    //! put photo url in body that will be sent to mongodb
+    req.body.cover = req.file.filename;
+  }
+  // const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body);
+  const updatedBook = await Book.findOneAndUpdate(
+    { _id: req.params.id },
+    req.body,
+    {
       new: true,
-    });
-
-    if (!updatedBook) {
-      return next(new AppError('No book found', 404));
     }
+  );
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        updatedBook,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
+  if (!updatedBook) {
+    return next(new AppError("No book found", 404));
   }
-};
 
-// eslint-disable-next-line consistent-return
-exports.reviewBook = async (req, res, next) => {
-  try {
-    const { ratingBook, reviewBook } = req.body;
+  res.status(200).json({
+    status: "success",
+    data: {
+      updatedBook,
+    },
+  });
+});
 
-    const book = await Book.findById(req.params.id);
+exports.reviewBook = catchAsync(async (req, res, next) => {
+  const { ratingBook, reviewBook } = req.body;
 
-    if (!book) {
-      return next(new AppError('No book found with that ID', 404));
-    }
+  const book = await Book.findById(req.params.id);
 
-    const review = {
-      ratingBook: Number(ratingBook),
-      reviewBook,
-    };
-
-    book.reviews.push(review);
-    if (book.reviews.length === 0) {
-      book.avgRate = 0;
-    } else {
-      book.avgRate = book.reviews.reduce((total, item) => total + item.ratingBook, 0)
-        / book.reviews.length;
-    }
-
-    res.status(201).json({
-      message: 'Book has a review now',
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
+  if (!book) {
+    return next(new AppError("No book found with that ID", 404));
   }
-};
 
-// eslint-disable-next-line consistent-return
-exports.reviewBook = async (req, res, next) => {
-  try {
-    const { ratingBook, reviewBook } = req.body;
+  const review = {
+    ratingBook: Number(ratingBook),
+    reviewBook,
+  };
 
-    const book = await Book.findById(req.params.id);
+  book.rating = book.reviews.length + 1;
 
-    if (!book) {
-      return next(new AppError('No book found with that ID', 404));
-    }
-
-    const review = {
-      ratingBook: Number(ratingBook),
-      reviewBook,
-    };
-
-    book.reviews.push(review);
-    if (book.reviews.length === 0) {
-      book.avgRate = 0;
-    } else {
-      book.avgRate = book.reviews.reduce((total, item) => total + item.ratingBook, 0)
-        / book.reviews.length;
-    }
-
-    res.status(201).json({
-      message: 'Book has a review now',
-    });
-  } catch (error) {
-    res.status(404).json({
-      status: 'fail',
-      message: error.message,
-    });
+  book.reviews.push(review);
+  if (book.reviews.length === 0) {
+    book.avgRate = 0;
+  } else {
+    book.avgRate = (
+      book.reviews.reduce((total, item) => total + item.ratingBook, 0) /
+      book.reviews.length
+    ).toFixed();
   }
-};
+
+  await book.save();
+  res.status(201).json({
+    message: "Book has a review now",
+  });
+});

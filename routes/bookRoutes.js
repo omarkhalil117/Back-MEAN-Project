@@ -28,4 +28,8 @@ router
   .patch(auth.protect, auth.specifyRole('admin'), upload.single('cover'), bookController.updateBook)
   .delete(auth.protect, auth.specifyRole('admin'), bookController.deleteBook);
 
+router
+  .route('/:id/reviews')
+  .post(bookController.reviewBook);
+
 module.exports = router;
