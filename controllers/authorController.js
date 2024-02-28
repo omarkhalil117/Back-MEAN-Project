@@ -56,7 +56,6 @@ const getAuthorBooks = async (id) => {
 // //////////////////////////////////////////////////////////////
 
 const getAuthorPage = async (pageNum) => {
-  console.log("running")
   const limit = 5 ;
   const authors = await Author.find({}).sort({ _id:1 })
   .skip(pageNum > 0 ? ( ( pageNum - 1 ) * limit ) : 0)
@@ -67,7 +66,6 @@ const getAuthorPage = async (pageNum) => {
 // //////////////////////////////////////////////////////////////
 
 const findUserAuthors = async (page , id) => {
-  console.log(222222222222)
   const limit = 5;
   const authors = await User.aggregate([
     {$match : { _id : new mongoose.Types.ObjectId(id) } },

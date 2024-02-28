@@ -1,7 +1,8 @@
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+
 const addBookToUser = catchAsync(async (req, res, next) => {
   const updatedUser = await User.findOneAndUpdate(
     // eslint-disable-next-line no-underscore-dangle
@@ -37,7 +38,7 @@ const getAllUsersBooks = catchAsync(async (req, res, next) => {
 });
 
 const getUserBooksPop = catchAsync(async (req,res,next) => {
-  const limit = 1;
+  const limit = 2;
   const page = req.params.num;
   const fullInfo = await User.aggregate([
   {$match: {_id: new mongoose.Types.ObjectId(req.params.id)}},
