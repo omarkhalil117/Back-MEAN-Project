@@ -67,8 +67,10 @@ exports.createBook = catchAsync(async (req, res) => {
     //! put photo url in body that will be sent to mongodb
     req.body.cover = req.file.filename;
   }
-  const newBook = await Book.create(req.body);
-
+  let newBook = await Book.create(req.body);
+  newBook = await Book.findById(newBook._id)
+  .populate("authorID")
+  .populate("categoryID");
   res.status(201).json({
     status: "success",
     data: {

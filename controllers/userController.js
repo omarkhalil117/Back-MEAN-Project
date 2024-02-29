@@ -27,7 +27,6 @@ const addBookToUser = catchAsync(async (req, res, next) => {
 });
 
 const getAllUsersBooks = catchAsync(async (req, res, next) => {
-  console.log("books")
   const userWithHisBooks = await User.findById(req.body._id).populate('books');
   res.status(200).json({
     status: 'success',

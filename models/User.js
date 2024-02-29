@@ -63,7 +63,8 @@ const userSchema = new mongoose.Schema(
           "Password must contain at least one lowercase letter, one uppercase letter, one digit, and be at least 8 characters long",
       },
     },
-    books: [
+    books: {
+      type: [
       {
         book: {
           type: mongoose.Schema.Types.ObjectId,
@@ -80,6 +81,7 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+},
     image: {
       type: String,
       //! make image required
