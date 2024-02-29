@@ -24,12 +24,15 @@ router
 
 router
   .route('/:id')
-  .get(bookController.getBook)
+  .get(auth.protect, bookController.getBook)
   .patch(auth.protect, auth.specifyRole('admin'), upload.single('cover'), bookController.updateBook)
   .delete(auth.protect, auth.specifyRole('admin'), bookController.deleteBook);
 
 router
   .route('/:id/reviews')
-  .post(bookController.reviewBook);
+  .post(auth.protect , bookController.reviewBook);
+
+
+router.get('/page/:num' , bookController.getBooksWithPagination);
 
 module.exports = router;

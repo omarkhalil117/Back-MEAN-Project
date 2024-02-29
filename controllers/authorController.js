@@ -82,6 +82,33 @@ const findUserAuthors = async (page , id) => {
   
 }
 
+
+const getPopularAuthors = async (req, res) => {
+  try {
+    const pipeline = [
+      { $match: { rating: { $gt: 0 } } },
+      { $group: { _id: '$authorID', count: { $sum: 1 } } },
+      {
+        $lookup: {
+          from: 'authors',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'author',
+        },
+      },
+      { $unwind: '$author' },
+      { $sort: { count: -1 } },
+      { $limit: 2 },
+    ];
+    const popularAuthors = await Books.aggregate(pipeline);
+    console.log(popularAuthors);
+
+    res.status(200).json(popularAuthors);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getAll,
   addAuthor,
@@ -91,4 +118,5 @@ module.exports = {
   getAuthorBooks,
   getAuthorPage,
   findUserAuthors,
+  getPopularAuthors
 };

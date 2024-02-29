@@ -67,15 +67,12 @@ const updateUserBookShelve = catchAsync(async (req,res,next) => {
 })
 
 const updateUserRating = catchAsync(async (req, res, next) => {
+  console.log(req.body);
   const updatedUserRate = await User.findOneAndUpdate(
-    { _id: req.params.id, "books.book": bookId },
-    { $set: { "books.$.rating": req.body } },
+    { _id: req.params.id, "books.book": req.query.bookId },
+    { $set: { "books.$.rating": req.body.rating } },
     { new: true }
   );
-
-  if (!updatedUserRate) {
-    return next(new AppError("User or book not found", 404));
-  }
 
   res.status(200).json({
     status: "success",
@@ -120,17 +117,33 @@ const login = catchAsync(async (req, res, next) => {
 });
 
 const register = catchAsync(async (req, res, next) => {
+  let decoded
+  let role
+  console.log(req.headers.authorization)
+  if(req.headers.authorization !== 'Bearer null'){
+     decoded = await promisify(jwt.verify)(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
+     if(decoded.role === 'admin'){
+      role = 'admin'
+    }
+  }
+  if (req.file) {
+    //! put photo url in body that will be sent to mongodb
+    req.body.image = req.file.filename;
+  }
   const {
     userName, firstName, lastName, email,
-    password,
+    password,image
 
   } = req.body;
+
   const newUser = await User.create({
     userName,
     firstName,
     lastName,
     email,
     password,
+    image,
+    role,
   });
   //! once your register you are logged in
   // eslint-disable-next-line no-underscore-dangle

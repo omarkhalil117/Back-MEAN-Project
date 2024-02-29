@@ -3,27 +3,29 @@ const express = require('express');
 
 const router = express.Router();
 const {
-  getAllCategories,
+  getAll,
   getCategoryById,
   createCategory,
   updateCategory,
   deleteCategory,
+  getAllCategories,
   getCategoriesOfUser,
   getPopularCategory,
-  getPopularAuthors,
   pagination
 } = require('../controllers/categoryController');
+const { protect, specifyRole } = require('../controllers/authController');
 
-router.get('/categories', getAllCategories);
-router.get('/categories/popular', getPopularCategory);
-router.get('/author/popular', getPopularAuthors);
-router.get('/categories/:id', getCategoryById);
-router.get('/categories/page/:id', pagination);
-router.get('/categories/user/:userId', getCategoriesOfUser);
- 
- 
-router.post('/categories', createCategory);
-router.patch('/categories/:id', updateCategory);
-router.delete('/categories/:id', deleteCategory);
+router.get('/', getAllCategories);
+router.get('/popular', getPopularCategory);
+
+// router.get('/:id', protect , getCategoryById);
+router.get('/:id', getCategoryById);
+// router.get('/page/:id', protect , pagination);
+router.get('/page/:id', pagination);
+router.get('/user/:userId', protect , getCategoriesOfUser);
+
+router.post('/', protect , specifyRole('admin') ,createCategory);
+router.patch('/:id', protect , specifyRole('admin'), updateCategory);
+router.delete('/:id', protect , specifyRole('admin'), deleteCategory);
 
 module.exports = router;

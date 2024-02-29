@@ -3,23 +3,21 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Author = require("../models/Author");
 
-// eslint-disable-next-line consistent-return
-exports.getAllbooks = catchAsync(async (req, res, next) => {
-  const page = req.query.page * 1 || 0;
+exports.getBooksWithPagination = catchAsync(async (req, res, next) => {
+  const page = (req.params.page - 1 ) || 0;
   const limit = 8;
   const skip = page * limit;
-
-  const books = await Book.find()
+  const books = await Book.find({})
     .populate({
-      path: "authorID",
+      path: 'authorID',
       model: Author,
-      select: "firstName lastName",
+      select: 'firstName lastName',
     })
     .skip(skip)
     .limit(limit);
 
   res.status(200).json({
-    status: "success",
+    status: 'success',
     result: books.length,
     data: {
       books,
@@ -28,16 +26,33 @@ exports.getAllbooks = catchAsync(async (req, res, next) => {
   return true;
 });
 
+exports.getAllbooks = async (req, res, next) => {
+  try {
+    const books = await Book.find().populate('categoryID').populate('authorID');
+    console.log(books);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        books,
+      },
+    });
+    next();
+  } catch (error) {
+    res.status(404).json({
+      status: 'fail',
+      message: error.message,
+    });
+    next()
+  }
+};
+
 // eslint-disable-next-line consistent-return
 exports.getBook = catchAsync(async (req, res, next) => {
   const book = await Book.findById(req.params.id)
     .populate("authorID")
     .populate("categoryID");
-
-  if (!book) {
-    return next(new AppError("No book found", 404));
-  }
-
+    
   res.status(200).json({
     status: "success",
     data: {
@@ -107,10 +122,6 @@ exports.reviewBook = catchAsync(async (req, res, next) => {
   const { ratingBook, reviewBook } = req.body;
 
   const book = await Book.findById(req.params.id);
-
-  if (!book) {
-    return next(new AppError("No book found with that ID", 404));
-  }
 
   const review = {
     ratingBook: Number(ratingBook),

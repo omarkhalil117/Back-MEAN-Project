@@ -39,12 +39,13 @@ router.patch('/:bookId', protect, specifyRole('user'), addBookToUser);
 //! user get all his books
 router.get('/books', protect, specifyRole('user'), getAllUsersBooks);
 
-router.patch('/:id/book/:bookId', updateUserBookShelve);
+router.patch('/:id/book', protect ,updateUserRating);
 
-router.get('/:id', getUserBooksPop);
+router.patch('/:id/book/:bookId', protect, updateUserBookShelve);
+
+router.get('/:id/page/:num', protect, getUserBooksPop);
 
 router.get('/:userId', getUser);
 
-router.patch('/:id/book/:bookId', updateUserRating);
 
 module.exports = router;

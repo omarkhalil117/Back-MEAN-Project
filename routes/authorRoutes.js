@@ -1,8 +1,9 @@
 const express = require('express');
 const multer = require('multer');
 const {
-  getAll, addAuthor, updateAuthor, deletAuthor, getOne,
+  getAll, addAuthor, updateAuthor, deletAuthor, getOne, getAuthorBooks, findUserAuthors , getPopularAuthors
 } = require('../controllers/authorController');
+const { protect, specifyRole } = require('../controllers/authController');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -20,9 +21,10 @@ const router = express.Router();
 
 router.get('/', getAll);
 
-router.get('/:id/page/:num', async (req, res) => {
+router.get('/popular', getPopularAuthors);
+
+router.get('/:id/page/:num', protect , async (req, res) => {
   try{
-    console.log(1111111111111111 , req.params.num , req.params.id)
     const authors = await findUserAuthors(req.params.num , req.params.id);
     console.log(authors)
     return res.json(authors);
@@ -31,6 +33,7 @@ router.get('/:id/page/:num', async (req, res) => {
   }
 })
 
+// router.get('/:id', protect , async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const author = await getOne(req.params.id);
@@ -41,7 +44,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', upload.single('photo'), async (req, res) => {
+router.post('/', protect , specifyRole('admin'), upload.single('photo'), async (req, res) => {
   try {
     if (req.file) {
       //! put photo url in body that will be sent to mongodb
@@ -55,7 +58,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
 });
 
 //! layer for upload will put info in next middleware
-router.patch('/:id', upload.single('photo'), async (req, res) => {
+router.patch('/:id', protect , specifyRole('admin') , protect ,upload.single('photo'), async (req, res) => {
   try {
     console.log(req.body);
     console.log('___________________________________________________________________________________');
@@ -70,7 +73,8 @@ router.patch('/:id', upload.single('photo'), async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+
+router.delete('/:id', protect , specifyRole('admin') , async (req, res) => {
   try {
     const deleted = await deletAuthor(req.params.id);
     return res.json(deleted);
@@ -78,6 +82,7 @@ router.delete('/:id', async (req, res) => {
     return res.status(400).json({ message: err.message });
   }
 });
+
 
 
 module.exports = router;

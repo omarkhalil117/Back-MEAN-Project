@@ -68,7 +68,6 @@ const userSchema = new mongoose.Schema(
         book: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Books",
-          unique: true,
         },
         shelve: {
           type: String,

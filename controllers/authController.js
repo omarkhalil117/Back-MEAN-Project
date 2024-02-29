@@ -13,8 +13,13 @@ const generateToken = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRE
 // eslint-disable-next-line no-unused-vars
 const register = catchAsync(async (req, res, next) => {
   let decoded
-  if(req.headers.authorization){
+  let role
+  console.log(req.headers.authorization)
+  if(req.headers.authorization !== 'Bearer null'){
      decoded = await promisify(jwt.verify)(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
+     if(decoded.role === 'admin'){
+      role = 'admin'
+    }
   }
   if (req.file) {
     //! put photo url in body that will be sent to mongodb
@@ -25,9 +30,7 @@ const register = catchAsync(async (req, res, next) => {
     password,image
 
   } = req.body;
-  if(decoded.role === 'admin'){
-    role = 'admin'
-  }
+  
   const newUser = await User.create({
     userName,
     firstName,
