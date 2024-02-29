@@ -43,7 +43,7 @@ module.exports = (err, req, res, next) => {
       status: err.status,
       message: err.message,
     });
-    console.log(err.message);
+    // console.log(err.message);
   } else {
     console.error('ERROR 😢', err);
     res.status(500).json({

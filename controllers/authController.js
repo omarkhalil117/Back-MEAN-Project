@@ -13,8 +13,12 @@ const generateToken = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRE
 // eslint-disable-next-line no-unused-vars
 const register = catchAsync(async (req, res, next) => {
   let decoded
-  if(req.headers.authorization){
+  let role
+  if(req.headers.authorization !== 'Bearer null'){
      decoded = await promisify(jwt.verify)(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
+     if(decoded.role === 'admin'){
+      role = 'admin'
+    }
   }
   if (req.file) {
     //! put photo url in body that will be sent to mongodb
@@ -25,9 +29,6 @@ const register = catchAsync(async (req, res, next) => {
     password,image
 
   } = req.body;
-  if(decoded.role === 'admin'){
-    role = 'admin'
-  }
   const newUser = await User.create({
     userName,
     firstName,
@@ -35,7 +36,9 @@ const register = catchAsync(async (req, res, next) => {
     email,
     password,
     image,
-    role
+    role,
+  
+
   });
   //! once your register you are logged in
   // eslint-disable-next-line no-underscore-dangle
@@ -64,6 +67,9 @@ const login = catchAsync(async (req, res, next) => {
   if(role === 'admin'  && user.role !== 'admin'){
     return next(new AppError(`Unauthorized as your are not ${req.body.role} 😒`, 401));
   }
+  if(role === 'user' &&  user.role === 'admin'){
+    return next(new AppError(`Unauthorized as your are not ${req.body.role} 😒`, 401));
+  }
   //! 3) if okay send token
   // eslint-disable-next-line no-underscore-dangle
   const token = generateToken(user._id, user.role);
@@ -80,7 +86,6 @@ const login = catchAsync(async (req, res, next) => {
 const protect = catchAsync(async (req, res, next) => {
   //! 1) Getting token and check of it's there
   let token;
-  console.log(req.headers.authorization)
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     [, token] = req.headers.authorization.split(' ');
   }

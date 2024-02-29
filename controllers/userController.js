@@ -27,7 +27,6 @@ const addBookToUser = catchAsync(async (req, res, next) => {
 });
 
 const getAllUsersBooks = catchAsync(async (req, res, next) => {
-  console.log("books")
   const userWithHisBooks = await User.findById(req.body._id).populate('books');
   res.status(200).json({
     status: 'success',
@@ -84,7 +83,6 @@ const updateUserRating = catchAsync(async (req, res, next) => {
 });
 
 const getUser = catchAsync(async (req, res, next) => {
-  console.log(5555555555555555555555555555555)
   // eslint-disable-next-line no-underscore-dangle
   const user = await User.findById(req.params.userId);
   res.status(200).json({

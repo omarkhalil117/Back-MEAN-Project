@@ -30,8 +30,8 @@ const Author = require("../models/Author");
 
 exports.getAllbooks = async (req, res, next) => {
   try {
-    const books = await Book.find();
-
+    const books = await Book.find().populate('categoryID').populate('authorID');
+    console.log(books);
     if (!books || books.length === 0) {
       return next(new AppError('No books found', 404));
     }
@@ -54,6 +54,8 @@ exports.getBook = catchAsync(async (req, res, next) => {
   const book = await Book.findById(req.params.id)
     .populate("authorID")
     .populate("categoryID");
+  
+  console.log(book)
 
   if (!book) {
     return next(new AppError("No book found", 404));
@@ -73,8 +75,10 @@ exports.createBook = catchAsync(async (req, res) => {
     //! put photo url in body that will be sent to mongodb
     req.body.cover = req.file.filename;
   }
-  const newBook = await Book.create(req.body);
-
+  let newBook = await Book.create(req.body);
+  newBook = await Book.findById(newBook._id)
+  .populate("authorID")
+  .populate("categoryID");
   res.status(201).json({
     status: "success",
     data: {

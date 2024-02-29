@@ -23,8 +23,6 @@ const booksSchema = new mongoose.Schema({
   },
   categoryID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Categories',
-    // required: [true, 'Book must have a category'],
     ref: "Category",
     required: [true, "Book must have a category"],
   },

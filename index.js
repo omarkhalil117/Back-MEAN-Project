@@ -27,10 +27,10 @@ mongoose.connect(process.env.MONGODB_URI_LOCAL)
   .then(() => console.log('Connected to db'))
   .catch((err) => console.log(err.message));
 
-app.use('/users', userRoutes);
-app.use('/books', bookRouter);
-app.use('/authors', authorRoutes);
-app.use('/categories', categoryRoutes);
+// app.use('/users', userRoutes);
+// app.use('/books', bookRouter);
+// app.use('/authors', authorRoutes);
+// app.use('/categories', categoryRoutes);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

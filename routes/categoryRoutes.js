@@ -13,6 +13,7 @@ const {
   getPopularAuthors,
   pagination
 } = require('../controllers/categoryController');
+const { specifyRole, protect } = require('../controllers/authController');
 router.get('/', getAllCategories);
 router.get('/categories', getAllCategories);
 router.get('/categories/popular', getPopularCategory);
@@ -22,8 +23,8 @@ router.get('/categories/page/:id', pagination);
 router.get('/categories/user/:userId', getCategoriesOfUser);
  
  
-router.post('/categories', createCategory);
-router.patch('/categories/:id', updateCategory);
-router.delete('/categories/:id', deleteCategory);
+router.post('/', protect, specifyRole('admin'),createCategory);
+router.patch('/:id', updateCategory);
+router.delete('/:id', deleteCategory);
 
 module.exports = router;
