@@ -1,6 +1,6 @@
-const User = require("../models/User");
-const catchAsync = require("../utils/catchAsync");
-const AppError = require("../utils/appError");
+const User = require('../models/User');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 const addBookToUser = catchAsync(async (req, res, next) => {
   const updatedUser = await User.findOneAndUpdate(
@@ -12,12 +12,12 @@ const addBookToUser = catchAsync(async (req, res, next) => {
     { new: true }
   );
   if (!updatedUser) {
-    return next(new AppError("no user found, you are not logged in"), 401);
+    return next(new AppError('no user found, you are not logged in'), 401);
   }
 
   res.status(200).json({
-    status: "success",
-    message: "Book added to user successfully",
+    status: 'success',
+    message: 'Book added to user successfully',
     data: {
       user: updatedUser,
     },
@@ -28,9 +28,9 @@ const addBookToUser = catchAsync(async (req, res, next) => {
 // eslint-disable-next-line no-unused-vars
 const getAllUsersBooks = catchAsync(async (req, res, next) => {
   // eslint-disable-next-line no-underscore-dangle
-  const userWithHisBooks = await User.findById(req.user._id).populate("books");
+  const userWithHisBooks = await User.findById(req.user._id).populate('books');
   res.status(200).json({
-    status: "success",
+    status: 'success',
     data: {
       user: userWithHisBooks,
     },
@@ -39,10 +39,10 @@ const getAllUsersBooks = catchAsync(async (req, res, next) => {
 
 const getUserBooksPop = catchAsync(async (req, res, next) => {
   const fullInfo = await User.findById(req.params.id).populate({
-    path: "books.book",
+    path: 'books.book',
     populate: [
-      { path: "authorID", model: "Authors" },
-      { path: "categoryID", model: "Category" },
+      { path: 'authorID', model: 'Authors' },
+      { path: 'categoryID', model: 'Category' },
     ],
   });
   res.json({
@@ -52,26 +52,22 @@ const getUserBooksPop = catchAsync(async (req, res, next) => {
 
 const updateUserBookShelve = catchAsync(async (req, res, next) => {
   const updatedShelve = await User.updateOne(
-    { _id: req.params.id, "books.book": req.params.bookId },
-    { $set: { "books.$.shelve": req.body.shelve } }
+    { _id: req.params.id, 'books.book': req.params.bookId },
+    { $set: { 'books.$.shelve': req.body.shelve } }
   );
-  res.json({ message: "success", updatedShelve });
+  res.json({ message: 'success', updatedShelve });
 });
 
 const updateUserRating = catchAsync(async (req, res, next) => {
   const updatedUserRate = await User.findOneAndUpdate(
-    { _id: req.params.id, "books.book": bookId },
-    { $set: { "books.$.rating": req.body } },
+    { _id: req.params.id, 'books.book': bookId },
+    { $set: { 'books.$.rating': req.body } },
     { new: true }
   );
 
-  if (!updatedUserRate) {
-    return next(new AppError("User or book not found", 404));
-  }
-
   res.status(200).json({
-    status: "success",
-    message: "Rating updated successfully",
+    status: 'success',
+    message: 'Rating updated successfully',
   });
 });
 

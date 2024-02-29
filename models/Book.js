@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const AutoIncrement = require("mongoose-sequence")(mongoose);
+const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const reviewsSchema = new mongoose.Schema(
   {
@@ -19,19 +19,19 @@ const booksSchema = new mongoose.Schema({
   },
   authorID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Authors",
-    required: [true, "Book must have an author"],
+    ref: 'Authors',
+    required: [true, 'Book must have an author'],
   },
   categoryID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
-    required: [true, "Book must have a category"],
+    ref: 'Category',
+    required: [true, 'Book must have a category'],
   },
   name: {
     type: String,
-    required: [true, "Book must have a name"],
-    minlength: [3, "Min length of title is 3"],
-    maxlength: [30, "Max length of title is 30"],
+    required: [true, 'Book must have a name'],
+    minlength: [3, 'Min length of title is 3'],
+    maxlength: [30, 'Max length of title is 30'],
   },
   reviews: {
     type: [reviewsSchema],
@@ -50,13 +50,13 @@ const booksSchema = new mongoose.Schema({
   },
   shelve: {
     type: String,
-    enum: ["read", "reading", "want to read"],
+    enum: ['read', 'reading', 'want to read'],
   },
 });
 
 // Increment id of the book
-booksSchema.plugin(AutoIncrement, { inc_field: "ID" });
+booksSchema.plugin(AutoIncrement, { inc_field: 'ID' });
 
-const Books = mongoose.model("Books", booksSchema);
+const Books = mongoose.model('Books', booksSchema);
 
 module.exports = Books;

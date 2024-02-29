@@ -2,7 +2,7 @@ const router = require('express').Router();
 const {
   register, login, protect, specifyRole,
 } = require('../controllers/authController');
-const { addBookToUser, getAllUsersBooks, getUserBooksPop, updateUserBookShelve } = require('../controllers/userController');
+const { addBookToUser, getAllUsersBooks, getUserBooksPop, updateUserBookShelve, updateUserRating } = require('../controllers/userController');
 
 //! POST register
 router.post('/register', register);

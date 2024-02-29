@@ -1,29 +1,43 @@
-const Book = require("../models/Book");
-const catchAsync = require("../utils/catchAsync");
-const AppError = require("../utils/appError");
-const Author = require("../models/Author");
+const Book = require('../models/Book');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const Author = require('../models/Author');
 
 // eslint-disable-next-line consistent-return
+
 exports.getAllbooks = catchAsync(async (req, res, next) => {
+  const books = await Book.find().populate({
+    path: 'authorID',
+    model: Author,
+    select: 'firstName lastName',
+  });
+
+  res.status(200).json({
+    status: 'success',
+    result: books.length,
+    data: {
+      books,
+    },
+  });
+  return true;
+});
+
+exports.getBooksWithPagination = catchAsync(async (req, res, next) => {
   const page = req.query.page * 1 || 0;
   const limit = 8;
   const skip = page * limit;
 
   const books = await Book.find()
     .populate({
-      path: "authorID",
+      path: 'authorID',
       model: Author,
-      select: "firstName lastName",
+      select: 'firstName lastName',
     })
     .skip(skip)
     .limit(limit);
 
-  if (!books || books.length === 0) {
-    return next(new AppError("No books found", 404));
-  }
-
   res.status(200).json({
-    status: "success",
+    status: 'success',
     result: books.length,
     data: {
       books,
@@ -35,15 +49,11 @@ exports.getAllbooks = catchAsync(async (req, res, next) => {
 // eslint-disable-next-line consistent-return
 exports.getBook = catchAsync(async (req, res, next) => {
   const book = await Book.findById(req.params.id)
-    .populate("authorID")
-    .populate("categoryID");
-
-  if (!book) {
-    return next(new AppError("No book found", 404));
-  }
+    .populate('authorID')
+    .populate('categoryID');
 
   res.status(200).json({
-    status: "success",
+    status: 'success',
     data: {
       book,
     },
@@ -59,7 +69,7 @@ exports.createBook = catchAsync(async (req, res) => {
   const newBook = await Book.create(req.body);
 
   res.status(201).json({
-    status: "success",
+    status: 'success',
     data: {
       Book: newBook,
     },
@@ -71,12 +81,12 @@ exports.deleteBook = catchAsync(async (req, res, next) => {
   const deletedBook = await Book.findByIdAndDelete(req.params.id);
 
   if (!deletedBook) {
-    return next(new AppError("No book found", 404));
+    return next(new AppError('No book found', 404));
   }
 
   res.status(200).json({
-    status: "success",
-    message: "Book deleted successfully",
+    status: 'success',
+    message: 'Book deleted successfully',
   });
 });
 
@@ -96,11 +106,11 @@ exports.updateBook = catchAsync(async (req, res, next) => {
   );
 
   if (!updatedBook) {
-    return next(new AppError("No book found", 404));
+    return next(new AppError('No book found', 404));
   }
 
   res.status(200).json({
-    status: "success",
+    status: 'success',
     data: {
       updatedBook,
     },
@@ -113,7 +123,7 @@ exports.reviewBook = catchAsync(async (req, res, next) => {
   const book = await Book.findById(req.params.id);
 
   if (!book) {
-    return next(new AppError("No book found with that ID", 404));
+    return next(new AppError('No book found with that ID', 404));
   }
 
   const review = {
@@ -135,6 +145,6 @@ exports.reviewBook = catchAsync(async (req, res, next) => {
 
   await book.save();
   res.status(201).json({
-    message: "Book has a review now",
+    message: 'Book has a review now',
   });
 });
