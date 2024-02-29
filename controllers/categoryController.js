@@ -6,6 +6,7 @@ const User = require('../models/User');
  
 
 const getAllCategories = async (req, res) => {
+  console.log(5555555555555555555555555555555)
   try {
     const categories = await Category.find();
     res.status(200).json(categories);

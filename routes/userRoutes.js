@@ -41,7 +41,7 @@ router.get('/books', protect, specifyRole('user'), getAllUsersBooks);
 
 router.patch('/:id/book/:bookId', updateUserBookShelve);
 
-router.get('/:id', getUserBooksPop);
+// router.get('/:id', getUserBooksPop);
 
 router.get('/:userId', getUser);
 

@@ -13,7 +13,7 @@ const {
   getPopularAuthors,
   pagination
 } = require('../controllers/categoryController');
-
+router.get('/', getAllCategories);
 router.get('/categories', getAllCategories);
 router.get('/categories/popular', getPopularCategory);
 router.get('/author/popular', getPopularAuthors);

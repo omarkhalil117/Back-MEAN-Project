@@ -4,29 +4,50 @@ const AppError = require("../utils/appError");
 const Author = require("../models/Author");
 
 // eslint-disable-next-line consistent-return
-exports.getAllbooks = catchAsync(async (req, res, next) => {
-  const page = req.query.page * 1 || 0;
-  const limit = 8;
-  const skip = page * limit;
+// exports.getAllbooks = catchAsync(async (req, res, next) => {
+//   const page = req.query.page * 1 || 0;
+//   const limit = 8;
+//   const skip = page * limit;
 
-  const books = await Book.find()
-    .populate({
-      path: "authorID",
-      model: Author,
-      select: "firstName lastName",
-    })
-    .skip(skip)
-    .limit(limit);
+//   const books = await Book.find()
+//     .populate({
+//       path: "authorID",
+//       model: Author,
+//       select: "firstName lastName",
+//     })
+//     .skip(skip)
+//     .limit(limit);
 
-  res.status(200).json({
-    status: "success",
-    result: books.length,
-    data: {
-      books,
-    },
-  });
-  return true;
-});
+//   res.status(200).json({
+//     status: "success",
+//     result: books.length,
+//     data: {
+//       books,
+//     },
+//   });
+//   return true;
+// });
+
+exports.getAllbooks = async (req, res, next) => {
+  try {
+    const books = await Book.find();
+
+    if (!books || books.length === 0) {
+      return next(new AppError('No books found', 404));
+    }
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        books,
+      },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: 'fail',
+      message: error.message,
+    });
+  }
+};
 
 // eslint-disable-next-line consistent-return
 exports.getBook = catchAsync(async (req, res, next) => {

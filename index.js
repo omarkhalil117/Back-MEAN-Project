@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './config.env' });
+const dotenv=require('dotenv');
 const express = require('express');
 const cors = require('cors'); // Import the cors middleware
 const multer = require('multer');
@@ -22,7 +22,7 @@ app.use(express.static('uploads'));
 app.use(cors());
 app.use(express.json());
 app.use(express.static('uploads'));
-
+dotenv.config('.env')
 mongoose.connect(process.env.MONGODB_URI_LOCAL)
   .then(() => console.log('Connected to db'))
   .catch((err) => console.log(err.message));
