@@ -23,6 +23,16 @@ router.get('/', getAll);
 
 router.get('/popular', getPopularAuthors);
 
+router.get('/:id', async (req, res) => {
+  try {
+    const author = await getOne(req.params.id);
+    const authorbooks = await getAuthorBooks(req.params.id);
+    return res.json({status:"succes", author , authorbooks});
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+});
+
 router.get('/:id/page/:num', protect , async (req, res) => {
   try{
     const authors = await findUserAuthors(req.params.num , req.params.id);
@@ -34,15 +44,6 @@ router.get('/:id/page/:num', protect , async (req, res) => {
 })
 
 // router.get('/:id', protect , async (req, res) => {
-router.get('/:id', async (req, res) => {
-  try {
-    const author = await getOne(req.params.id);
-    const authorbooks = await getAuthorBooks(req.params.id);
-    return res.json({status:"succes", author , authorbooks});
-  } catch (err) {
-    return res.status(400).json({ message: err.message });
-  }
-});
 
 router.post('/', protect , specifyRole('admin'), upload.single('photo'), async (req, res) => {
   try {

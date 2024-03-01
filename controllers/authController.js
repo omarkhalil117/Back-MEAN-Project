@@ -44,7 +44,7 @@ const register = catchAsync(async (req, res, next) => {
   });
   //! once your register you are logged in
   // eslint-disable-next-line no-underscore-dangle
-  const token = generateToken(newUser._id);
+  const token = generateToken(newUser._id , role);
   res.status(201).json({
     status: 'success',
     token,

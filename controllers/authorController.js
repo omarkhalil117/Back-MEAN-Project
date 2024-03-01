@@ -46,10 +46,7 @@ const deletAuthor = async (id) => {
 // //////////////////////////////////////////////////////////////
 
 const getAuthorBooks = async (id) => {
-  const authorBooks = await Books.aggregate([
-    {$unwind:'$authorID'},
-    {$match : {authorID: id}}
-  ]);
+  const authorBooks = await Books.find({authorID : id})
   return authorBooks;
 }
 
