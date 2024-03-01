@@ -33,7 +33,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.get('/:id/page/:num', protect, async (req, res) => {
+router.get('/:id/page/:num', async (req, res) => {
   try {
     const authors = await findUserAuthors(req.params.num, req.params.id);
     console.log(authors);

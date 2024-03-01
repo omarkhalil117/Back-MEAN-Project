@@ -1,8 +1,6 @@
 const router = require('express').Router();
 const multer = require('multer');
-const {
-  register, login, protect, specifyRole,
-} = require('../controllers/authController');
+const { register, login } = require('../controllers/authController');
 const {
   addBookToUser,
   getAllUsersBooks,
@@ -34,16 +32,16 @@ router.post(
 router.post('/login', login);
 
 //! user add book
-router.patch('/:bookId', protect, specifyRole('user'), addBookToUser);
+router.patch('/:bookId', addBookToUser);
 
 //! user get all his books
-router.get('/books', protect, specifyRole('user'), getAllUsersBooks);
+router.get('/books', getAllUsersBooks);
 
-router.patch('/:id/book', protect, updateUserRating);
+router.patch('/:id/book', updateUserRating);
 
-router.patch('/:id/book/:bookId', protect, updateUserBookShelve);
+router.patch('/:id/book/:bookId', updateUserBookShelve);
 
-router.get('/:id/page/:num', protect, getUserBooksPop);
+router.get('/:id/page/:num', getUserBooksPop);
 
 router.get('/:userId', getUser);
 
