@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const reviewsSchema = new mongoose.Schema(
   {
@@ -9,7 +9,7 @@ const reviewsSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const booksSchema = new mongoose.Schema({
@@ -28,9 +28,9 @@ const booksSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: [true, "Book must have a name"],
-    minlength: [3, "Min length of title is 3"],
-    maxlength: [30, "Max length of title is 30"],
+    required: [true, 'Book must have a name'],
+    minlength: [3, 'Min length of title is 3'],
+    maxlength: [30, 'Max length of title is 30'],
   },
   reviews: {
     type: [reviewsSchema],
@@ -45,7 +45,7 @@ const booksSchema = new mongoose.Schema({
   },
   cover: {
     type: String,
-   // required: [true, 'Book must have a cover'],
+    // required: [true, 'Book must have a cover'],
   },
   shelve: {
     type: String,

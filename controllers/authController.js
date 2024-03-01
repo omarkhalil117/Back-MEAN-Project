@@ -12,13 +12,13 @@ const generateToken = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRE
 
 // eslint-disable-next-line no-unused-vars
 const register = catchAsync(async (req, res, next) => {
-  let decoded
-  let role
-  console.log(req.headers.authorization)
-  if(req.headers.authorization !== 'Bearer null'){
-     decoded = await promisify(jwt.verify)(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
-     if(decoded.role === 'admin'){
-      role = 'admin'
+  let decoded;
+  let role;
+  console.log(req.headers.authorization);
+  if (req.headers.authorization !== 'Bearer null') {
+    decoded = await promisify(jwt.verify)(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
+    if (decoded.role === 'admin') {
+      role = 'admin';
     }
   }
   if (req.file) {
@@ -27,10 +27,10 @@ const register = catchAsync(async (req, res, next) => {
   }
   const {
     userName, firstName, lastName, email,
-    password,image
+    password, image,
 
   } = req.body;
-  
+
   const newUser = await User.create({
     userName,
     firstName,
@@ -39,12 +39,11 @@ const register = catchAsync(async (req, res, next) => {
     password,
     image,
     role,
-  
 
   });
   //! once your register you are logged in
   // eslint-disable-next-line no-underscore-dangle
-  const token = generateToken(newUser._id , role);
+  const token = generateToken(newUser._id, role);
   res.status(201).json({
     status: 'success',
     token,
@@ -66,10 +65,10 @@ const login = catchAsync(async (req, res, next) => {
   if (!user || !correct) {
     return next(new AppError('Incorrect email or password', 401));
   }
-  if(role === 'admin'  && user.role !== 'admin'){
+  if (role === 'admin' && user.role !== 'admin') {
     return next(new AppError(`Unauthorized as your are not ${req.body.role} 😒`, 401));
   }
-  if(role === 'user' &&  user.role === 'admin'){
+  if (role === 'user' && user.role === 'admin') {
     return next(new AppError(`Unauthorized as your are not ${req.body.role} 😒`, 401));
   }
   //! 3) if okay send token

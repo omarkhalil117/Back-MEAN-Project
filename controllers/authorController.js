@@ -1,7 +1,7 @@
+const mongoose = require('mongoose');
 const Author = require('../models/Author');
 const Books = require('../models/Book');
-const User = require('../models/User')
-const mongoose = require('mongoose');
+const User = require('../models/User');
 
 const getAll = async (req, res) => {
   try {
@@ -46,39 +46,45 @@ const deletAuthor = async (id) => {
 // //////////////////////////////////////////////////////////////
 
 const getAuthorBooks = async (id) => {
-  const authorBooks = await Books.find({authorID : id})
+  const authorBooks = await Books.find({ authorID: id });
   return authorBooks;
-}
+};
 
 // //////////////////////////////////////////////////////////////
 
 const getAuthorPage = async (pageNum) => {
-  const limit = 5 ;
-  const authors = await Author.find({}).sort({ _id:1 })
-  .skip(pageNum > 0 ? ( ( pageNum - 1 ) * limit ) : 0)
-  .limit(limit)
+  const limit = 5;
+  const authors = await Author.find({}).sort({ _id: 1 })
+    .skip(pageNum > 0 ? ((pageNum - 1) * limit) : 0)
+    .limit(limit);
   return authors;
-}
+};
 
 // //////////////////////////////////////////////////////////////
 
-const findUserAuthors = async (page , id) => {
+const findUserAuthors = async (page, id) => {
   const limit = 5;
   const authors = await User.aggregate([
-    {$match : { _id : new mongoose.Types.ObjectId(id) } },
-    {$project : { _id : 0, books : 1 }},
-    {$unwind : '$books'},
-    {$lookup : { from:'books' , localField: 'books.book' , foreignField: '_id', as: 'book' } },
-    {$unwind : '$book'},
-    {$lookup : { from :'authors' , localField: 'book.authorID' , foreignField: '_id' , as: 'author' }},
-    {$group : {_id : {authors:'$author'}} },
-    {$skip: page > 0 ? ( ( page - 1 ) * limit ) : 0},
-    {$limit:limit}
-    ]);
-  return authors
-  
-}
-
+    { $match: { _id: new mongoose.Types.ObjectId(id) } },
+    { $project: { _id: 0, books: 1 } },
+    { $unwind: '$books' },
+    {
+      $lookup: {
+        from: 'books', localField: 'books.book', foreignField: '_id', as: 'book',
+      },
+    },
+    { $unwind: '$book' },
+    {
+      $lookup: {
+        from: 'authors', localField: 'book.authorID', foreignField: '_id', as: 'author',
+      },
+    },
+    { $group: { _id: { authors: '$author' } } },
+    { $skip: page > 0 ? ((page - 1) * limit) : 0 },
+    { $limit: limit },
+  ]);
+  return authors;
+};
 
 const getPopularAuthors = async (req, res) => {
   try {
@@ -115,5 +121,5 @@ module.exports = {
   getAuthorBooks,
   getAuthorPage,
   findUserAuthors,
-  getPopularAuthors
+  getPopularAuthors,
 };

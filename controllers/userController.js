@@ -1,7 +1,7 @@
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const mongoose = require('mongoose');
 
 const addBookToUser = catchAsync(async (req, res, next) => {
   const updatedUser = await User.findOneAndUpdate(
@@ -27,6 +27,7 @@ const addBookToUser = catchAsync(async (req, res, next) => {
 });
 
 const getAllUsersBooks = catchAsync(async (req, res, next) => {
+  console.log('books');
   const userWithHisBooks = await User.findById(req.body._id).populate('books');
   res.status(200).json({
     status: 'success',
@@ -36,46 +37,64 @@ const getAllUsersBooks = catchAsync(async (req, res, next) => {
   });
 });
 
-const getUserBooksPop = catchAsync(async (req,res,next) => {
+const getUserBooksPop = catchAsync(async (req, res, next) => {
   const limit = 2;
   const page = req.params.num;
   const fullInfo = await User.aggregate([
-  {$match: {_id: new mongoose.Types.ObjectId(req.params.id)}},
-  {$project: {_id:0,books:1}},
-  {$unwind:'$books'},
-  {$lookup : { from:'books' , localField: 'books.book' , foreignField: '_id', as: 'book' } },
-  {$unwind: '$book'},
-  {$lookup : { from:'authors' , localField: 'book.authorID' , foreignField: '_id' , as: 'author' }},
-  {$lookup : { from:'categories' , localField: 'book.categoryID' , foreignField: '_id' , as: 'category' }},
-  {$group: { _id: { book:'$book' , author: '$author' ,category: '$category',shelve: '$books',} }},
-  {$skip: page > 0 ? ( ( page - 1 ) * limit ) : 0},
-  {$limit:limit}
+    { $match: { _id: new mongoose.Types.ObjectId(req.params.id) } },
+    { $project: { _id: 0, books: 1 } },
+    { $unwind: '$books' },
+    {
+      $lookup: {
+        from: 'books', localField: 'books.book', foreignField: '_id', as: 'book',
+      },
+    },
+    { $unwind: '$book' },
+    {
+      $lookup: {
+        from: 'authors', localField: 'book.authorID', foreignField: '_id', as: 'author',
+      },
+    },
+    {
+      $lookup: {
+        from: 'categories', localField: 'book.categoryID', foreignField: '_id', as: 'category',
+      },
+    },
+    {
+      $group: {
+        _id: {
+          book: '$book', author: '$author', category: '$category', shelve: '$books',
+        },
+      },
+    },
+    { $skip: page > 0 ? ((page - 1) * limit) : 0 },
+    { $limit: limit },
   ]);
 
   res.json({
-    fullInfo
-  })
-})
+    fullInfo,
+  });
+});
 
-const updateUserBookShelve = catchAsync(async (req,res,next) => {
+const updateUserBookShelve = catchAsync(async (req, res, next) => {
   const updatedShelve = await User.updateOne(
-   { _id: req.params.id , 'books.book': req.params.bookId },
-   { $set: { 'books.$.shelve': req.body.shelve } }
-)
-  res.json({message:"success" , updatedShelve});
-})
+    { _id: req.params.id, 'books.book': req.params.bookId },
+    { $set: { 'books.$.shelve': req.body.shelve } },
+  );
+  res.json({ message: 'success', updatedShelve });
+});
 
 const updateUserRating = catchAsync(async (req, res, next) => {
   console.log(req.body);
   const updatedUserRate = await User.findOneAndUpdate(
-    { _id: req.params.id, "books.book": req.query.bookId },
-    { $set: { "books.$.rating": req.body.rating } },
-    { new: true }
+    { _id: req.params.id, 'books.book': req.query.bookId },
+    { $set: { 'books.$.rating': req.body.rating } },
+    { new: true },
   );
 
   res.status(200).json({
-    status: "success",
-    message: "Rating updated successfully",
+    status: 'success',
+    message: 'Rating updated successfully',
   });
 });
 
@@ -116,13 +135,13 @@ const login = catchAsync(async (req, res, next) => {
 });
 
 const register = catchAsync(async (req, res, next) => {
-  let decoded
-  let role
-  console.log(req.headers.authorization)
-  if(req.headers.authorization !== 'Bearer null'){
-     decoded = await promisify(jwt.verify)(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
-     if(decoded.role === 'admin'){
-      role = 'admin'
+  let decoded;
+  let role;
+  console.log(req.headers.authorization);
+  if (req.headers.authorization !== 'Bearer null') {
+    decoded = await promisify(jwt.verify)(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
+    if (decoded.role === 'admin') {
+      role = 'admin';
     }
   }
   if (req.file) {
@@ -131,7 +150,7 @@ const register = catchAsync(async (req, res, next) => {
   }
   const {
     userName, firstName, lastName, email,
-    password,image
+    password, image,
 
   } = req.body;
 
@@ -157,11 +176,11 @@ const register = catchAsync(async (req, res, next) => {
 });
 
 module.exports = {
-  addBookToUser, 
-  getAllUsersBooks, 
-  login, 
-  getUserBooksPop, 
-  register, 
+  addBookToUser,
+  getAllUsersBooks,
+  login,
+  getUserBooksPop,
+  register,
   updateUserBookShelve,
   updateUserRating,
   getUser,

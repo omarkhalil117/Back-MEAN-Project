@@ -3,7 +3,6 @@ const Category = require('../models/Category');
 const Book = require('../models/Book');
 const Author = require('../models/Author');
 const User = require('../models/User');
- 
 
 const getAllCategories = async (req, res) => {
   try {
@@ -62,8 +61,6 @@ const getPopularCategory = async (req, res) => {
   }
 };
 
-
-
 const getCategoriesOfUser = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.userId });
@@ -84,7 +81,7 @@ const getCategoriesOfUser = async (req, res) => {
 };
 
 const createCategory = async (req, res) => {
-  console.log(55555555555555555)
+  console.log(55555555555555555);
   try {
     const newCategory = await Category.create(req.body);
     res.status(200).json(newCategory);
@@ -119,9 +116,7 @@ const deleteCategory = async (req, res) => {
   }
 };
 
- 
-
-const pagination =async (req, res) => {
+const pagination = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
@@ -139,7 +134,7 @@ const pagination =async (req, res) => {
       .limit(limit)
       .exec();
 
-      res.status(200).json({ categorycontent: category, booksbycategory: books });
+    res.status(200).json({ categorycontent: category, booksbycategory: books });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -153,5 +148,5 @@ module.exports = {
   deleteCategory,
   getCategoriesOfUser,
   getPopularCategory,
-  pagination
+  pagination,
 };

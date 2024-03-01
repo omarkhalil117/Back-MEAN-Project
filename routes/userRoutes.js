@@ -9,7 +9,7 @@ const {
   getUserBooksPop,
   updateUserBookShelve,
   getUser,
-  updateUserRating
+  updateUserRating,
 } = require('../controllers/userController');
 
 const storage = multer.diskStorage({
@@ -39,13 +39,12 @@ router.patch('/:bookId', protect, specifyRole('user'), addBookToUser);
 //! user get all his books
 router.get('/books', protect, specifyRole('user'), getAllUsersBooks);
 
-router.patch('/:id/book', protect ,updateUserRating);
+router.patch('/:id/book', protect, updateUserRating);
 
 router.patch('/:id/book/:bookId', protect, updateUserBookShelve);
 
 router.get('/:id/page/:num', protect, getUserBooksPop);
 
 router.get('/:userId', getUser);
-
 
 module.exports = router;

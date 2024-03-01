@@ -30,9 +30,8 @@ router
 
 router
   .route('/:id/reviews')
-  .post(auth.protect , bookController.reviewBook);
+  .post(auth.protect, bookController.reviewBook);
 
-
-router.get('/page/:num' , bookController.getBooksWithPagination);
+router.get('/page/:num', bookController.getBooksWithPagination);
 
 module.exports = router;

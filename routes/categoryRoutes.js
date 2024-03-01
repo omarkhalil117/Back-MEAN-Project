@@ -1,6 +1,5 @@
 const express = require('express');
 
-
 const router = express.Router();
 const {
   getAll,
@@ -11,7 +10,7 @@ const {
   getAllCategories,
   getCategoriesOfUser,
   getPopularCategory,
-  pagination
+  pagination,
 } = require('../controllers/categoryController');
 const { protect, specifyRole } = require('../controllers/authController');
 
@@ -22,10 +21,10 @@ router.get('/popular', getPopularCategory);
 router.get('/:id', getCategoryById);
 // router.get('/page/:id', protect , pagination);
 router.get('/page/:id', pagination);
-router.get('/user/:userId', protect , getCategoriesOfUser);
+router.get('/user/:userId', protect, getCategoriesOfUser);
 
-router.post('/', protect , specifyRole('admin') ,createCategory);
-router.patch('/:id', protect , specifyRole('admin'), updateCategory);
-router.delete('/:id', protect , specifyRole('admin'), deleteCategory);
+router.post('/', protect, specifyRole('admin'), createCategory);
+router.patch('/:id', protect, specifyRole('admin'), updateCategory);
+router.delete('/:id', protect, specifyRole('admin'), deleteCategory);
 
 module.exports = router;
