@@ -100,14 +100,14 @@ exports.updateBook = catchAsync(async (req, res, next) => {
     req.body.cover = req.file.filename;
   }
   // const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body);
-  const updatedBook = await Book.findOneAndUpdate(
+  let updatedBook = await Book.findOneAndUpdate(
     { _id: req.params.id },
     req.body,
     {
       new: true,
     },
   );
-
+  updatedBook = await Book.findById(updatedBook._id).populate('categoryID').populate('authorID');
   res.status(200).json({
     status: 'success',
     data: {
